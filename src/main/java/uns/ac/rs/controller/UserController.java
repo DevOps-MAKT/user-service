@@ -9,6 +9,8 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.SecurityContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import uns.ac.rs.model.User;
 import uns.ac.rs.service.UserService;
@@ -20,6 +22,7 @@ import java.util.List;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class UserController {
+    private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
     @Autowired
     private UserService userService;
@@ -36,6 +39,7 @@ public class UserController {
     @Path("/all")
     @Produces(MediaType.APPLICATION_JSON)
     public List<User> getAllUsers() {
+        logger.info("Requested getting all users");
         return userService.getAllUsers();
     }
 
