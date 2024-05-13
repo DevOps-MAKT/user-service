@@ -1,17 +1,20 @@
 package uns.ac.rs.controller;
 
+import jakarta.annotation.security.PermitAll;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.enterprise.context.RequestScoped;
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.Produces;
+import jakarta.persistence.PersistenceException;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.SecurityContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import uns.ac.rs.GeneralResponse;
+import uns.ac.rs.dto.request.UserRequestDTO;
+import uns.ac.rs.dto.response.UserResponseDTO;
 import uns.ac.rs.model.User;
 import uns.ac.rs.service.UserService;
 
@@ -28,7 +31,7 @@ public class UserController {
     private UserService userService;
 
     @GET
-    @RolesAllowed({"host", "admin", "owner"})
+    @RolesAllowed({"host", "admin", "guest"})
     @Path("/me")
     public String me(@Context SecurityContext securityContext) {
         return securityContext.getUserPrincipal().getName();
@@ -37,10 +40,30 @@ public class UserController {
     @GET
     @RolesAllowed("admin")
     @Path("/all")
-    @Produces(MediaType.APPLICATION_JSON)
     public List<User> getAllUsers() {
         logger.info("Requested getting all users");
         return userService.getAllUsers();
     }
+
+    @POST
+    @Path("/create")
+    @PermitAll
+    public Response createUser(UserRequestDTO userRequestDTO) {
+        try {
+            User createdUser = userService.createUser(userRequestDTO);
+            return Response.status(Response.Status.CREATED).entity(new GeneralResponse<>(new UserResponseDTO(createdUser), "User successfully registered")).build();
+        } catch (PersistenceException e) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(new GeneralResponse<>("", "Username or email already exists")).build();
+        }
+    }
+
+    //Used for checking whether JWT+Roles works (for now)
+    @GET
+    @Path("/dumby")
+    @RolesAllowed("admin")
+    public Response dumby() {
+        return Response.ok("tu sam").build();
+    }
+
 
 }
