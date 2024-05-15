@@ -27,10 +27,14 @@ public class AuthService {
     public String generateJwt(User user) {
         long duration = System.currentTimeMillis() / 1000 + 3600;
         return Jwt.issuer("user-service")
-                .subject(user.getUsername())
+                .subject(user.getEmail())
                 .groups(user.getRole())
                 .expiresAt(duration)
                 .sign();
+    }
+
+    public User validateUserWithRole(String email, String role) {
+        return userRepository.findByEmailAndRole(email, role);
     }
 
 }

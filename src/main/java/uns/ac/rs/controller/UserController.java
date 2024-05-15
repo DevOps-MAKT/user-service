@@ -51,18 +51,42 @@ public class UserController {
     public Response createUser(UserRequestDTO userRequestDTO) {
         try {
             User createdUser = userService.createUser(userRequestDTO);
-            return Response.status(Response.Status.CREATED).entity(new GeneralResponse<>(new UserResponseDTO(createdUser), "User successfully registered")).build();
+            return Response.status(Response.Status.CREATED)
+                    .entity(new GeneralResponse<>(new UserResponseDTO(createdUser), "User successfully registered"))
+                    .build();
         } catch (PersistenceException e) {
-            return Response.status(Response.Status.BAD_REQUEST).entity(new GeneralResponse<>("", "Username or email already exists")).build();
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(new GeneralResponse<>("", "Username or email already exists"))
+                    .build();
         }
     }
 
-    //Used for checking whether JWT+Roles works (for now)
+    @PUT
+    @Path("/update")
+    @RolesAllowed({"host", "admin", "guest"})
+    public Response updateUser(@Context SecurityContext ctx, UserRequestDTO userRequestDTO) {
+        try {
+
+            User updatedUser = userService.updateUser(userRequestDTO, ctx.getUserPrincipal().getName());
+            return Response.status(Response.Status.OK)
+                    .entity(new GeneralResponse<>(new UserResponseDTO(updatedUser), "User successfully updated"))
+                    .build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(new GeneralResponse<>("", "Something went wrong"))
+                    .build();
+        }
+    }
+
     @GET
-    @Path("/dumby")
-    @RolesAllowed("admin")
-    public Response dumby() {
-        return Response.ok("tu sam").build();
+    @Path("/retrieve-current-user-info")
+    @RolesAllowed({"host", "admin", "guest"})
+    public Response retrieveCurrentUserInfo(@Context SecurityContext ctx) {
+        String email = ctx.getUserPrincipal().getName();
+        User user = userService.retrieveCurrentUser(email);
+        return Response.ok()
+                .entity(new GeneralResponse<>(new UserResponseDTO(user), "Info about the logged-in user successfully retrieved"))
+                .build();
     }
 
 

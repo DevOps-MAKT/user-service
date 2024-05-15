@@ -1,5 +1,6 @@
 package uns.ac.rs.service;
 
+import io.quarkus.elytron.security.common.BcryptUtil;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,5 +35,24 @@ public class UserService {
         User user = new User(userRequestDTO, location);
         userRepository.persist(user);
         return user;
+    }
+
+    public User updateUser(UserRequestDTO userRequestDTO, String email) {
+        User user = userRepository.findByEmail(email);
+        setUserAttributes(user, userRequestDTO);
+        userRepository.persist(user);
+        return user;
+    }
+
+    public User retrieveCurrentUser(String email) {
+        return userRepository.findByEmail(email);
+    }
+
+    private void setUserAttributes(User user, UserRequestDTO userRequestDTO) {
+        user.setFirstName(userRequestDTO.getFirstName());
+        user.setLastName(userRequestDTO.getLastName());
+        user.setUsername(userRequestDTO.getUsername());
+        user.setPassword(BcryptUtil.bcryptHash(userRequestDTO.getPassword()));
+        user.setLocation(locationRepository.findByCityAndCountry(userRequestDTO.getLocation().getCity(), userRequestDTO.getLocation().getCountry()));
     }
 }
