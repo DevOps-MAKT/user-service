@@ -3,14 +3,12 @@ package uns.ac.rs.unit;
 import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-import io.quarkus.elytron.security.common.BcryptUtil;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.junit.jupiter.api.extension.ExtendWith;
 import uns.ac.rs.dto.LoginDTO;
-import uns.ac.rs.model.Location;
 import uns.ac.rs.model.User;
 import uns.ac.rs.repository.UserRepository;
 import uns.ac.rs.service.AuthService;
@@ -29,7 +27,7 @@ public class AuthServiceTests {
     public void testLogin_UserFound_PasswordMatch() {
         LoginDTO mockLoginDTO = new LoginDTO("some-username", "admin123");
 
-        User mockUser = new User("some.email@gmail.com", "some-username", "$2a$12$0Z2p.u8SdUm71I7uzaEgDOnay5dDtbiV2S3QdXfKccBlzPO0JRkA.", "Someone", "Something", "guest", new Location("Subotica", "Serbia"));
+        User mockUser = new User("some.email@gmail.com", "some-username", "$2a$12$0Z2p.u8SdUm71I7uzaEgDOnay5dDtbiV2S3QdXfKccBlzPO0JRkA.", "Someone", "Something", "guest", "Subotica", "Serbia");
 
         when(userRepository.findByUsername("some-username")).thenReturn(mockUser);
 
@@ -58,7 +56,7 @@ public class AuthServiceTests {
     public void testLogin_PasswordDoesNotMatch() {
         LoginDTO mockLoginDTO = new LoginDTO("some-username", "incorrect_password");
 
-        User mockUser = new User("some.email@gmail.com", "some-username", "$2a$12$0Z2p.u8SdUm71I7uzaEgDOnay5dDtbiV2S3QdXfKccBlzPO0JRkA.", "Someone", "Something", "guest", new Location("Subotica", "Serbia"));
+        User mockUser = new User("some.email@gmail.com", "some-username", "$2a$12$0Z2p.u8SdUm71I7uzaEgDOnay5dDtbiV2S3QdXfKccBlzPO0JRkA.", "Someone", "Something", "guest", "Subotica", "Serbia");
 
         when(userRepository.findByUsername("some-username")).thenReturn(mockUser);
 

@@ -66,7 +66,6 @@ public class UserController {
     @RolesAllowed({"host", "admin", "guest"})
     public Response updateUser(@Context SecurityContext ctx, UserRequestDTO userRequestDTO) {
         try {
-
             User updatedUser = userService.updateUser(userRequestDTO, ctx.getUserPrincipal().getName());
             return Response.status(Response.Status.OK)
                     .entity(new GeneralResponse<>(new UserResponseDTO(updatedUser), "User successfully updated"))

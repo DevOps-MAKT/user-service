@@ -60,10 +60,8 @@ public class UserControllerTests {
                 "\"firstName\": \"Someone\"," +
                 "\"lastName\": \"Something\"," +
                 "\"role\": \"guest\"," +
-                "\"location\": {" +
                 "\"country\": \"Serbia\"," +
                 "\"city\": \"Subotica\"" +
-                "}" +
                 "}";
 
         given()
@@ -88,10 +86,8 @@ public class UserControllerTests {
                 "\"firstName\": \"Someone\"," +
                 "\"lastName\": \"Something\"," +
                 "\"role\": \"guest\"," +
-                "\"location\": {" +
                 "\"country\": \"Serbia\"," +
                 "\"city\": \"Subotica\"" +
-                "}" +
                 "}";
 
         given()
@@ -114,10 +110,8 @@ public class UserControllerTests {
                 "\"password\": \"admin123\"," +
                 "\"firstName\": \"new-Someone\"," +
                 "\"lastName\": \"new-Something\"," +
-                "\"location\": {" +
                 "\"country\": \"Serbia\"," +
                 "\"city\": \"Novi Sad\"" +
-                "}" +
                 "}";
 
         given()
@@ -133,8 +127,8 @@ public class UserControllerTests {
                 .body("data.username", equalTo("admin"))
                 .body("data.firstName", equalTo("new-Someone"))
                 .body("data.lastName", equalTo("new-Something"))
-                .body("data.location.city", equalTo("Novi Sad"))
-                .body("data.location.country", equalTo("Serbia"))
+                .body("data.city", equalTo("Novi Sad"))
+                .body("data.country", equalTo("Serbia"))
                 .body("message", equalTo("User successfully updated"));
     }
 
@@ -153,8 +147,8 @@ public class UserControllerTests {
                 .body("data.username", equalTo("admin"))
                 .body("data.firstName", equalTo("new-Someone"))
                 .body("data.lastName", equalTo("new-Something"))
-                .body("data.location.city", equalTo("Novi Sad"))
-                .body("data.location.country", equalTo("Serbia"))
+                .body("data.city", equalTo("Novi Sad"))
+                .body("data.country", equalTo("Serbia"))
                 .body("message", equalTo("Info about the logged-in user successfully retrieved"));
     }
 

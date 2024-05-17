@@ -1,7 +1,6 @@
 package uns.ac.rs.dto.request;
 
 import lombok.Data;
-import uns.ac.rs.dto.LocationDTO;
 
 @Data
 public class UserRequestDTO {
@@ -11,15 +10,17 @@ public class UserRequestDTO {
     private String firstName;
     private String lastName;
     private String role;
-    private LocationDTO location;
+    private String city;
+    private String country;
 
-    public UserRequestDTO(String email, String username, String password, String firstName, String lastName, String role, LocationDTO location) {
+    public UserRequestDTO(String email, String username, String password, String firstName, String lastName, String role, String city, String country) {
         this.email = email;
         this.username = username;
         this.password = password;
         this.firstName = firstName;
         this.lastName = lastName;
         this.role = role;
-        this.location = location;
+        this.city = city;
+        this.country = country;
     }
 }
