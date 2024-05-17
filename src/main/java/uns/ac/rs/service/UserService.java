@@ -7,9 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uns.ac.rs.dto.request.UserRequestDTO;
-import uns.ac.rs.model.Location;
 import uns.ac.rs.model.User;
-import uns.ac.rs.repository.LocationRepository;
 import uns.ac.rs.repository.UserRepository;
 
 import java.util.List;
@@ -22,17 +20,13 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
 
-    @Autowired
-    private LocationRepository locationRepository;
-
     public List<User> getAllUsers(){
         logger.info("Getting all users");
         return userRepository.listAll();
     }
 
     public User createUser(UserRequestDTO userRequestDTO) {
-        Location location = locationRepository.findByCityAndCountry(userRequestDTO.getLocation().getCity(), userRequestDTO.getLocation().getCountry());
-        User user = new User(userRequestDTO, location);
+        User user = new User(userRequestDTO);
         userRepository.persist(user);
         return user;
     }
@@ -53,6 +47,7 @@ public class UserService {
         user.setLastName(userRequestDTO.getLastName());
         user.setUsername(userRequestDTO.getUsername());
         user.setPassword(BcryptUtil.bcryptHash(userRequestDTO.getPassword()));
-        user.setLocation(locationRepository.findByCityAndCountry(userRequestDTO.getLocation().getCity(), userRequestDTO.getLocation().getCountry()));
+        user.setCity(userRequestDTO.getCity());
+        user.setCountry(userRequestDTO.getCountry());
     }
 }

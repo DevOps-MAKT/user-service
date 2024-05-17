@@ -30,31 +30,32 @@ public class User  {
     private String role; // comma-separated list of roles added to the target principal representation attributes.
     private String firstName;
     private String lastName;
-    @ManyToOne
-    @JoinColumn(name="location_id")
-    private Location location;
+    private String city;
+    private String country;
 
-    public User(UserRequestDTO userRequestDTO, Location location) {
+    public User(UserRequestDTO userRequestDTO) {
         email = userRequestDTO.getEmail();
         username = userRequestDTO.getUsername();
         password = BcryptUtil.bcryptHash(userRequestDTO.getPassword());
         role = userRequestDTO.getRole();
         firstName = userRequestDTO.getFirstName();
         lastName = userRequestDTO.getLastName();
-        this.location = location;
+        city = userRequestDTO.getCity();
+        country = userRequestDTO.getCountry();
     }
 
     public User() {
 
     }
 
-    public User(String email, String username, String password, String role, String firstName, String lastName, Location location) {
+    public User(String email, String username, String password, String role, String firstName, String lastName, String city, String country) {
         this.email = email;
         this.username = username;
         this.password = password;
         this.role = role;
         this.firstName = firstName;
         this.lastName = lastName;
-        this.location = location;
+        this.city = city;
+        this.country = country;
     }
 }
