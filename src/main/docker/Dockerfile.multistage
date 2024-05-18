@@ -3,8 +3,9 @@ FROM quay.io/quarkus/ubi-quarkus-mandrel-builder-image:jdk-17 AS build
 COPY --chown=quarkus:quarkus mvnw /code/mvnw
 COPY --chown=quarkus:quarkus .mvn /code/.mvn
 COPY --chown=quarkus:quarkus pom.xml /code/
-USER quarkus
+
 WORKDIR /code
+RUN chmod +x ./mvnw
 RUN ./mvnw -B quarkus:3.9.3:go-offline
 COPY src /code/src
 RUN ./mvnw package -Dnative -DskipTests
@@ -15,13 +16,7 @@ WORKDIR /work/
 COPY --from=build /code/target/*-runner /work/application
 COPY --from=build /code/target/classes/import.sql /work/import.sql
 
-# set up permissions for user `1001`
-RUN chmod 775 /work /work/application \
-  && chown -R 1001 /work \
-  && chmod -R "g+rwX" /work \
-  && chown -R 1001:root /work
 
 EXPOSE 8001
-USER 1001
 
 CMD ["/work/application", "-Dquarkus.http.host=0.0.0.0"]
