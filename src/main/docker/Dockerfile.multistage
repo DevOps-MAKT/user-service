@@ -5,6 +5,8 @@ COPY --chown=quarkus:quarkus mvnw /code/mvnw
 COPY --chown=quarkus:quarkus pom.xml /code/
 
 WORKDIR /code
+
+chmod +x ./mvnw
 RUN ./mvnw -B quarkus:3.9.3:go-offline
 COPY src /code/src
 RUN ./mvnw package -Dnative -DskipTests
