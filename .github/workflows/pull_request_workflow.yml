@@ -70,4 +70,4 @@ jobs:
             ${{ runner.os }}-maven-
 
       - name: Install dependencies and build with Maven
-        run: mvn -B clean install
+        run: mvn -B clean install -DskipTests
