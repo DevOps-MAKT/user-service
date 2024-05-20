@@ -53,7 +53,7 @@ public class AuthControllerTests {
         .when()
                 .post(loginEndpoint)
         .then()
-                .statusCode(401)
+                .statusCode(400)
                 .body("data", equalTo(""))
                 .body("message", equalTo("Credentials aren't valid"));
     }

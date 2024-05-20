@@ -30,7 +30,7 @@ public class AuthController {
     public Response login(LoginDTO loginDTO) {
         Optional<User> user = authService.login(loginDTO);
         if (user.isEmpty()) {
-            return Response.status(Response.Status.UNAUTHORIZED)
+            return Response.status(Response.Status.BAD_REQUEST)
                     .entity(new GeneralResponse<>("", "Credentials aren't valid"))
                     .build();
         }
