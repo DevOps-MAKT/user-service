@@ -88,5 +88,30 @@ public class UserController {
                 .build();
     }
 
+    @PATCH
+    @Path("/change-automatic-reservation-acceptance-status")
+    @RolesAllowed("host")
+    public Response changeAutomaticReservationAcceptance(@Context SecurityContext ctx) {
+        String email = ctx.getUserPrincipal().getName();
+        User user = userService.changeAutomaticReservationAcceptanceStatus(email);
+        return Response
+                .ok()
+                .entity(new GeneralResponse<>(new UserResponseDTO(user), "Updated automatic reservation acceptance status"))
+                .build();
+    }
+
+
+    @GET
+    @Path("/get-automatic-reservation-acceptance-status")
+    @RolesAllowed("host")
+    public Response getAutomaticReservationAcceptanceStatus(@Context SecurityContext ctx) {
+        String email = ctx.getUserPrincipal().getName();
+        Boolean isAutomaticReservationAcceptanceActive = userService.getAutomaticReservationAcceptanceStatus(email);
+        return Response
+                .ok()
+                .entity(new GeneralResponse<>(isAutomaticReservationAcceptanceActive, "Successfully retrieved automatic reservation acceptance status"))
+                .build();
+    }
+
 
 }

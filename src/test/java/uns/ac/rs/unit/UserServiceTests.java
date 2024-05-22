@@ -53,4 +53,25 @@ public class UserServiceTests {
         assertEquals(updatedUser.getFirstName(), mockUserRequestDTO.getFirstName());
         assertEquals(updatedUser.getLastName(), mockUserRequestDTO.getLastName());
     }
+
+    @Test
+    public void testChangeAutomaticReservationAcceptanceStatus() {
+        User mockUser = new User("some.email@gmail.com", "other-username", "other-pw", "host", "other-name", "other-last-name", "Subotica", "Serbia");
+        when(userRepository.findByEmail("some.email@gmail.com")).thenReturn(mockUser);
+        User user = userService.changeAutomaticReservationAcceptanceStatus("some.email@gmail.com");
+
+        verify(userRepository).persist(user);
+
+        assertNotNull(user);
+        assertTrue(user.isAutomaticReservationAcceptance());
+    }
+
+    @Test
+    public void testGetAutomaticReservationAcceptanceStatus() {
+        User mockUser = new User("some.email@gmail.com", "other-username", "other-pw", "host", "other-name", "other-last-name", "Subotica", "Serbia");
+        when(userRepository.findByEmail("some.email@gmail.com")).thenReturn(mockUser);
+        boolean status = userService.getAutomaticReservationAcceptanceStatus("some.email@gmail.com");
+
+        assertFalse(status);
+    }
 }

@@ -42,6 +42,18 @@ public class UserService {
         return userRepository.findByEmail(email);
     }
 
+    public User changeAutomaticReservationAcceptanceStatus(String email) {
+        User user = userRepository.findByEmail(email);
+        user.setAutomaticReservationAcceptance(!user.isAutomaticReservationAcceptance());
+        userRepository.persist(user);
+        return user;
+    }
+
+    public boolean getAutomaticReservationAcceptanceStatus(String email) {
+        User user = userRepository.findByEmail(email);
+        return user.isAutomaticReservationAcceptance();
+    }
+
     private void setUserAttributes(User user, UserRequestDTO userRequestDTO) {
         user.setFirstName(userRequestDTO.getFirstName());
         user.setLastName(userRequestDTO.getLastName());

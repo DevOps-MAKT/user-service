@@ -38,6 +38,14 @@ public class UserControllerTests {
     @TestHTTPResource("retrieve-current-user-info")
     URL retrieveCurrentUserInfoEndpoint;
 
+    @TestHTTPEndpoint(UserController.class)
+    @TestHTTPResource("change-automatic-reservation-acceptance-status")
+    URL changeAutomaticReservationAcceptanceStatus;
+
+    @TestHTTPEndpoint(UserController.class)
+    @TestHTTPResource("get-automatic-reservation-acceptance-status")
+    URL getAutomaticReservationAcceptanceStatus;
+
     @BeforeEach
     public void login(){
         Response response = RestAssured.given()
@@ -161,5 +169,45 @@ public class UserControllerTests {
                 .get(retrieveCurrentUserInfoEndpoint)
         .then()
                 .statusCode(401);
+    }
+
+    @Test
+    @Order(6)
+    public void whenChangeAutomaticReservationAcceptanceStatus_thenReturnUserWithUpdatedInfo() {
+        Response response = RestAssured.given()
+                .contentType("application/json")
+                .body("{\"username\": \"pera\", \"password\": \"pera123\"}")
+                .when().post(loginEndpoint)
+                .then().extract().response();
+
+        jwt = response.getBody().jsonPath().getString("data");
+        given()
+                .contentType(ContentType.JSON)
+                .header("Authorization", "Bearer " + jwt)
+        .when()
+                .patch(changeAutomaticReservationAcceptanceStatus)
+        .then()
+                .statusCode(200)
+                .body("data.automaticReservationAcceptance", equalTo(true));
+    }
+
+    @Test
+    @Order(7)
+    public void whenGetAutomaticReservationAcceptanceStatus_thenReturnBooleanValue() {
+        Response response = RestAssured.given()
+                .contentType("application/json")
+                .body("{\"username\": \"pera\", \"password\": \"pera123\"}")
+                .when().post(loginEndpoint)
+                .then().extract().response();
+
+        jwt = response.getBody().jsonPath().getString("data");
+        given()
+                .contentType(ContentType.JSON)
+                .header("Authorization", "Bearer " + jwt)
+        .when()
+                .get(getAutomaticReservationAcceptanceStatus)
+        .then()
+                .statusCode(200)
+                .body("data", equalTo(true));
     }
 }

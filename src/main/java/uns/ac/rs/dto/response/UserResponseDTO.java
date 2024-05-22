@@ -11,6 +11,7 @@ public class UserResponseDTO {
     private String lastName;
     private String city;
     private String country;
+    private boolean automaticReservationAcceptance;
 
     public UserResponseDTO(User user) {
         email = user.getEmail();
@@ -19,5 +20,6 @@ public class UserResponseDTO {
         lastName = user.getLastName();
         city = user.getCity();
         country = user.getCountry();
+        automaticReservationAcceptance = user.isAutomaticReservationAcceptance();
     }
 }
