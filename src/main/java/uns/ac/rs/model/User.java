@@ -32,6 +32,7 @@ public class User  {
     private String lastName;
     private String city;
     private String country;
+    private boolean automaticReservationAcceptance;
 
     public User(UserRequestDTO userRequestDTO) {
         email = userRequestDTO.getEmail();
@@ -42,6 +43,7 @@ public class User  {
         lastName = userRequestDTO.getLastName();
         city = userRequestDTO.getCity();
         country = userRequestDTO.getCountry();
+        automaticReservationAcceptance = false;
     }
 
     public User() {
@@ -57,5 +59,6 @@ public class User  {
         this.lastName = lastName;
         this.city = city;
         this.country = country;
+        automaticReservationAcceptance = false;
     }
 }
