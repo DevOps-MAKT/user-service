@@ -40,11 +40,19 @@ public class UserControllerTests {
 
     @TestHTTPEndpoint(UserController.class)
     @TestHTTPResource("change-automatic-reservation-acceptance-status")
-    URL changeAutomaticReservationAcceptanceStatus;
+    URL changeAutomaticReservationAcceptanceStatusEndpoint;
 
     @TestHTTPEndpoint(UserController.class)
     @TestHTTPResource("get-automatic-reservation-acceptance-status")
-    URL getAutomaticReservationAcceptanceStatus;
+    URL getAutomaticReservationAcceptanceStatusEndpoint;
+
+    @TestHTTPEndpoint(UserController.class)
+    @TestHTTPResource("append-cancellation")
+    URL appendCancellationEndpoint;
+
+    @TestHTTPEndpoint(UserController.class)
+    @TestHTTPResource("no-cancellations/gost@gmail.com")
+    URL getNOCancellationsEndpoint;
 
     @BeforeEach
     public void login(){
@@ -185,7 +193,7 @@ public class UserControllerTests {
                 .contentType(ContentType.JSON)
                 .header("Authorization", "Bearer " + jwt)
         .when()
-                .patch(changeAutomaticReservationAcceptanceStatus)
+                .patch(changeAutomaticReservationAcceptanceStatusEndpoint)
         .then()
                 .statusCode(200)
                 .body("data.automaticReservationAcceptance", equalTo(true));
@@ -205,9 +213,51 @@ public class UserControllerTests {
                 .contentType(ContentType.JSON)
                 .header("Authorization", "Bearer " + jwt)
         .when()
-                .get(getAutomaticReservationAcceptanceStatus)
+                .get(getAutomaticReservationAcceptanceStatusEndpoint)
         .then()
                 .statusCode(200)
                 .body("data", equalTo(true));
+    }
+
+    @Test
+    @Order(8)
+    public void whenAppendCancellation_thenNOCancellationsIsIncremented() {
+        Response response = RestAssured.given()
+                .contentType("application/json")
+                .body("{\"username\": \"gost\", \"password\": \"pera123\"}")
+                .when().post(loginEndpoint)
+                .then().extract().response();
+
+        jwt = response.getBody().jsonPath().getString("data");
+        given()
+                .contentType(ContentType.JSON)
+                .header("Authorization", "Bearer " + jwt)
+        .when()
+                .patch(appendCancellationEndpoint)
+        .then()
+                .statusCode(200)
+                .body("data", equalTo(1))
+                .body("message", equalTo("Successfully appended number of cancellations"));
+    }
+
+    @Test
+    @Order(9)
+    public void whenRetrieveNOCancellations_thenReturnNOCancellations() {
+        Response response = RestAssured.given()
+                .contentType("application/json")
+                .body("{\"username\": \"pera\", \"password\": \"pera123\"}")
+                .when().post(loginEndpoint)
+                .then().extract().response();
+
+        jwt = response.getBody().jsonPath().getString("data");
+        given()
+                .contentType(ContentType.JSON)
+                .header("Authorization", "Bearer " + jwt)
+        .when()
+                .get(getNOCancellationsEndpoint)
+        .then()
+                .statusCode(200)
+                .body("data", equalTo(1))
+                .body("message", equalTo("Successfully retrieved number of cancellations"));
     }
 }

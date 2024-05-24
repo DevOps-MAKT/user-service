@@ -74,4 +74,22 @@ public class UserServiceTests {
 
         assertFalse(status);
     }
+
+    @Test
+    public void testAppendCancellation() {
+        User mockUser = new User("some.email@gmail.com", "other-username", "other-pw", "host", "other-name", "other-last-name", "Subotica", "Serbia");
+        when(userRepository.findByEmail("some.email@gmail.com")).thenReturn(mockUser);
+        User user = userService.appendCancellation("some.email@gmail.com");
+
+        assertEquals(user.getNoCancellations(), 1);
+    }
+
+    @Test
+    public void testGetNOCancellations() {
+        User mockUser = new User("some.email@gmail.com", "other-username", "other-pw", "host", "other-name", "other-last-name", "Subotica", "Serbia");
+        when(userRepository.findByEmail("some.email@gmail.com")).thenReturn(mockUser);
+        int noCancellations = userService.getNoCancellations("some.email@gmail.com");
+
+        assertEquals(noCancellations, 0);
+    }
 }
