@@ -113,5 +113,27 @@ public class UserController {
                 .build();
     }
 
+    @PATCH
+    @Path("/append-cancellation")
+    @RolesAllowed("guest")
+    public Response appendCancellation(@Context SecurityContext ctx) {
+        String email = ctx.getUserPrincipal().getName();
+        User user = userService.appendCancellation(email);
+        return Response
+                .ok()
+                .entity(new GeneralResponse<>(user.getNoCancellations(), "Successfully appended number of cancellations"))
+                .build();
+    }
+
+    @GET
+    @Path("/no-cancellations/{guest_email}")
+    @RolesAllowed("host")
+    public Response getNoCancellations(@Context SecurityContext ctx, @PathParam("guest_email") String guestEmail) {
+        int noCancellations = userService.getNoCancellations(guestEmail);
+        return Response
+                .ok()
+                .entity(new GeneralResponse<>(noCancellations, "Successfully retrieved number of cancellations"))
+                .build();
+    }
 
 }
