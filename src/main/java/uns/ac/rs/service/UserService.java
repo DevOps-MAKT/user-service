@@ -66,6 +66,11 @@ public class UserService {
         return user.getNoCancellations();
     }
 
+    public void deactivateUser(String email) {
+        User user = userRepository.findByEmail(email);
+        user.setActive(false);
+    }
+
     private void setUserAttributes(User user, UserRequestDTO userRequestDTO) {
         user.setFirstName(userRequestDTO.getFirstName());
         user.setLastName(userRequestDTO.getLastName());

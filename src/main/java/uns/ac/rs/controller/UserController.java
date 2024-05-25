@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import uns.ac.rs.GeneralResponse;
+import uns.ac.rs.MicroserviceCommunicator;
 import uns.ac.rs.dto.request.UserRequestDTO;
 import uns.ac.rs.dto.response.UserResponseDTO;
 import uns.ac.rs.model.User;
@@ -29,6 +30,9 @@ public class UserController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private MicroserviceCommunicator microserviceCommunicator;
 
     @GET
     @RolesAllowed({"host", "admin", "guest"})
@@ -135,5 +139,60 @@ public class UserController {
                 .entity(new GeneralResponse<>(noCancellations, "Successfully retrieved number of cancellations"))
                 .build();
     }
+
+    @PATCH
+    @Path("/terminate-guest")
+    @RolesAllowed("guest")
+    public Response terminateGuestAccount(@Context SecurityContext ctx, @HeaderParam("Authorization") String authorizationHeader) {
+        String email = ctx.getUserPrincipal().getName();
+        GeneralResponse response = microserviceCommunicator.processResponse(
+                "http://localhost:8003/reservation-service/reservation/are-reservations-active/" + email,
+                "GET",
+                authorizationHeader);
+        if (!(boolean) response.getData()) {
+            return Response
+                    .status(Response.Status.BAD_REQUEST)
+                    .entity(new GeneralResponse<>(false, "There are active reservations"))
+                    .build();
+        }
+        userService.deactivateUser(email);
+        return Response
+                .status(Response.Status.OK)
+                .entity(new GeneralResponse<>(true, "Successfully terminated account"))
+                .build();
+    }
+
+    @PATCH
+    @Path("/terminate-host")
+    @RolesAllowed("host")
+    public Response terminateHostAccount(@Context SecurityContext ctx, @HeaderParam("Authorization") String authorizationHeader) {
+        String email = ctx.getUserPrincipal().getName();
+        GeneralResponse response = microserviceCommunicator.processResponse(
+                "http://localhost:8003/reservation-service/reservation/do-active-reservations-exist/" + email,
+                "GET",
+                authorizationHeader);
+        if ((boolean) response.getData()) {
+            return Response
+                    .status(Response.Status.BAD_REQUEST)
+                    .entity(new GeneralResponse<>(false, "There are active reservations"))
+                    .build();
+        }
+        userService.deactivateUser(email);
+        GeneralResponse successfulAccommodationDeletion = microserviceCommunicator.processResponse(
+                "http://localhost:8002/accommodation-service/accommodation/deactivate-hosts-accommodations/" + email,
+                "PATCH",
+                authorizationHeader);
+        if (!(boolean) successfulAccommodationDeletion.getData())  {
+            return Response
+                    .status(Response.Status.OK)
+                    .entity(new GeneralResponse<>(false, "Something went wrong while terminating accommodations"))
+                    .build();
+        }
+        return Response
+                .status(Response.Status.OK)
+                .entity(new GeneralResponse<>(true, "Successfully terminated account"))
+                .build();
+    }
+
 
 }
