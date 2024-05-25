@@ -34,6 +34,7 @@ public class User  {
     private String country;
     private boolean automaticReservationAcceptance;
     private int noCancellations;
+    private boolean active;
 
     public User(UserRequestDTO userRequestDTO) {
         email = userRequestDTO.getEmail();
@@ -46,6 +47,7 @@ public class User  {
         country = userRequestDTO.getCountry();
         automaticReservationAcceptance = false;
         noCancellations = 0;
+        active = true;
     }
 
     public User() {
@@ -63,5 +65,6 @@ public class User  {
         this.country = country;
         automaticReservationAcceptance = false;
         noCancellations = 0;
+        active = true;
     }
 }

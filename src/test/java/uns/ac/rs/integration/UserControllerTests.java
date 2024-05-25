@@ -1,5 +1,6 @@
 package uns.ac.rs.integration;
 
+import io.quarkus.test.InjectMock;
 import io.quarkus.test.common.http.TestHTTPEndpoint;
 import io.quarkus.test.common.http.TestHTTPResource;
 import io.quarkus.test.junit.QuarkusTest;
@@ -7,6 +8,8 @@ import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.*;
+import uns.ac.rs.GeneralResponse;
+import uns.ac.rs.MicroserviceCommunicator;
 import uns.ac.rs.controller.AuthController;
 import uns.ac.rs.controller.UserController;
 
@@ -15,12 +18,16 @@ import java.net.URL;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.mockito.Mockito.doReturn;
 
 @QuarkusTest
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class UserControllerTests {
 
     public static String jwt;
+
+    @InjectMock
+    private MicroserviceCommunicator microserviceCommunicator;
 
     @TestHTTPEndpoint(AuthController.class)
     @TestHTTPResource("login")
@@ -53,6 +60,14 @@ public class UserControllerTests {
     @TestHTTPEndpoint(UserController.class)
     @TestHTTPResource("no-cancellations/gost@gmail.com")
     URL getNOCancellationsEndpoint;
+
+    @TestHTTPEndpoint(UserController.class)
+    @TestHTTPResource("terminate-guest")
+    URL terminateGuestEndpoint;
+
+    @TestHTTPEndpoint(UserController.class)
+    @TestHTTPResource("terminate-host")
+    URL terminateHostEndpoint;
 
     @BeforeEach
     public void login(){
@@ -260,4 +275,123 @@ public class UserControllerTests {
                 .body("data", equalTo(1))
                 .body("message", equalTo("Successfully retrieved number of cancellations"));
     }
+
+    @Test
+    @Order(10)
+    public void whenTerminateGuestWithReservations_thenCantTerminate() {
+        Response response = RestAssured.given()
+                .contentType("application/json")
+                .body("{\"username\": \"gost\", \"password\": \"pera123\"}")
+                .when().post(loginEndpoint)
+                .then().extract().response();
+
+        jwt = response.getBody().jsonPath().getString("data");
+
+        doReturn(new GeneralResponse(false, "200"))
+                .when(microserviceCommunicator)
+                .processResponse("http://localhost:8003/reservation-service/reservation/are-reservations-active/gost@gmail.com",
+                        "GET",
+                        "Bearer " + jwt);
+
+        given()
+                .contentType(ContentType.JSON)
+                .header("Authorization", "Bearer " + jwt)
+        .when()
+                .patch(terminateGuestEndpoint)
+        .then()
+                .statusCode(400)
+                .body("data", equalTo(false))
+                .body("message", equalTo("There are active reservations"));
+    }
+
+    @Test
+    @Order(11)
+    public void whenTerminateGuestWithoutReservations_thenCanTerminate() {
+        Response response = RestAssured.given()
+                .contentType("application/json")
+                .body("{\"username\": \"gost\", \"password\": \"pera123\"}")
+                .when().post(loginEndpoint)
+                .then().extract().response();
+
+        jwt = response.getBody().jsonPath().getString("data");
+
+        doReturn(new GeneralResponse(true, "200"))
+                .when(microserviceCommunicator)
+                .processResponse("http://localhost:8003/reservation-service/reservation/are-reservations-active/gost@gmail.com",
+                        "GET",
+                        "Bearer " + jwt);
+
+        given()
+                .contentType(ContentType.JSON)
+                .header("Authorization", "Bearer " + jwt)
+        .when()
+                .patch(terminateGuestEndpoint)
+        .then()
+                .statusCode(200)
+                .body("data", equalTo(true))
+                .body("message", equalTo("Successfully terminated account"));
+    }
+
+    @Test
+    @Order(12)
+    public void whenTerminateHostWithActiveReservations_thenCantTerminate() {
+        Response response = RestAssured.given()
+                .contentType("application/json")
+                .body("{\"username\": \"pera\", \"password\": \"pera123\"}")
+                .when().post(loginEndpoint)
+                .then().extract().response();
+
+        jwt = response.getBody().jsonPath().getString("data");
+
+        doReturn(new GeneralResponse(true, "200"))
+                .when(microserviceCommunicator)
+                .processResponse("http://localhost:8003/reservation-service/reservation/do-active-reservations-exist/pera@gmail.com",
+                        "GET",
+                        "Bearer " + jwt);
+
+        given()
+                .contentType(ContentType.JSON)
+                .header("Authorization", "Bearer " + jwt)
+        .when()
+                .patch(terminateHostEndpoint)
+        .then()
+                .statusCode(400)
+                .body("data", equalTo(false))
+                .body("message", equalTo("There are active reservations"));
+    }
+
+    @Test
+    @Order(13)
+    public void whenTerminateHostWithNoActiveReservations_thenCanTerminate() {
+        Response response = RestAssured.given()
+                .contentType("application/json")
+                .body("{\"username\": \"pera\", \"password\": \"pera123\"}")
+                .when().post(loginEndpoint)
+                .then().extract().response();
+
+        jwt = response.getBody().jsonPath().getString("data");
+
+        doReturn(new GeneralResponse(false, "200"))
+                .when(microserviceCommunicator)
+                .processResponse("http://localhost:8003/reservation-service/reservation/do-active-reservations-exist/pera@gmail.com",
+                        "GET",
+                        "Bearer " + jwt);
+
+        doReturn(new GeneralResponse(true, "200"))
+                .when(microserviceCommunicator)
+                .processResponse("http://localhost:8002/accommodation-service/accommodation/deactivate-hosts-accommodations/pera@gmail.com",
+                        "PATCH",
+                        "Bearer " + jwt);
+
+        given()
+                .contentType(ContentType.JSON)
+                .header("Authorization", "Bearer " + jwt)
+        .when()
+                .patch(terminateHostEndpoint)
+        .then()
+                .statusCode(200)
+                .body("data", equalTo(true))
+                .body("message", equalTo("Successfully terminated account"));
+    }
 }
+
