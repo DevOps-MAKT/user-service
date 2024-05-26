@@ -12,7 +12,10 @@ import uns.ac.rs.GeneralResponse;
 import uns.ac.rs.MicroserviceCommunicator;
 import uns.ac.rs.controller.AuthController;
 import uns.ac.rs.controller.UserController;
+import uns.ac.rs.dto.AccommodationReviewDTO;
 import uns.ac.rs.dto.HostReviewDTO;
+import uns.ac.rs.dto.MinAccommodationDTO;
+import uns.ac.rs.model.AccommodationReview;
 import uns.ac.rs.model.HostReview;
 
 import java.net.URL;
@@ -88,6 +91,22 @@ public class UserControllerTests {
     @TestHTTPEndpoint(UserController.class)
     @TestHTTPResource("host-reviews-info")
     URL hostReviewsInfoEndpoint;
+
+    @TestHTTPEndpoint(UserController.class)
+    @TestHTTPResource("accommodation-reviews")
+    URL getAccommodationReviewsEndpoint;
+
+    @TestHTTPEndpoint(UserController.class)
+    @TestHTTPResource("add-accommodation-review")
+    URL addAccommodationReviewEndpoint;
+
+    @TestHTTPEndpoint(UserController.class)
+    @TestHTTPResource("delete-accommodation-review/some-accommodation")
+    URL deleteAccommodationReviewEndpoint;
+
+    @TestHTTPEndpoint(UserController.class)
+    @TestHTTPResource("accommodation-reviews-info/some-accommodation")
+    URL accommodationReviewsInfoEndpoint;
 
     @BeforeEach
     public void login(){
@@ -554,5 +573,157 @@ public class UserControllerTests {
                 .body("data.deleted", equalTo(true))
                 .body("message", equalTo("Successfully deleted host review"));
     }
+
+    @Test
+    @Order(19)
+    public void whenGetOneAccommodationWithoutSentReview_thenReturnNewEmptyReview() {
+        Response response = RestAssured.given()
+                .contentType("application/json")
+                .body("{\"username\": \"gost\", \"password\": \"pera123\"}")
+                .when().post(loginEndpoint)
+                .then().extract().response();
+
+        jwt = response.getBody().jsonPath().getString("data");
+
+        List<Long> accommodationIds = new ArrayList<>();
+        accommodationIds.add(1L);
+
+        List<MinAccommodationDTO> minAccommodationDTOS = new ArrayList<>();
+        minAccommodationDTOS.add(new MinAccommodationDTO(1L, "some-accommodation"));
+
+        doReturn(new GeneralResponse(accommodationIds, "200"))
+                .when(microserviceCommunicator)
+                .processResponse("http://localhost:8003/reservation-service/retrieve-reservation-accommodations/gost@gmail.com",
+                        "GET",
+                        "");
+
+        doReturn(new GeneralResponse(minAccommodationDTOS, "200"))
+                .when(microserviceCommunicator)
+                .processResponse("http://localhost:8002/accommodation-service/retrieve-min-accommodations",
+                        "GET",
+                        "");
+
+        given()
+                .contentType(ContentType.JSON)
+                .header("Authorization", "Bearer " + jwt)
+        .when()
+                .get(getAccommodationReviewsEndpoint)
+        .then()
+                .statusCode(200)
+                .body("data.size()", equalTo(1))
+                .body("message", equalTo("Successfully retrieved reviews"));
+    }
+
+    @Test
+    @Order(20)
+    public void whenCreateAccommodationReview_thenReturnCreatedReview() {
+        Response response = RestAssured.given()
+                .contentType("application/json")
+                .body("{\"username\": \"gost\", \"password\": \"pera123\"}")
+                .when().post(loginEndpoint)
+                .then().extract().response();
+
+        jwt = response.getBody().jsonPath().getString("data");
+
+        AccommodationReview accommodationReview = new AccommodationReview();
+        accommodationReview.setAccommodationName("some-accommodation");
+        accommodationReview.setGuestEmail("gost@gmail.com");
+        accommodationReview.setRating(3);
+        long now = Instant.now().toEpochMilli();
+        accommodationReview.setTimestamp(now);
+        AccommodationReviewDTO accommodationReviewDTO = new AccommodationReviewDTO(accommodationReview);
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(accommodationReviewDTO)
+                .header("Authorization", "Bearer " + jwt)
+        .when()
+                .put(addAccommodationReviewEndpoint)
+        .then()
+                .statusCode(200)
+                .body("data.accommodationName", equalTo("some-accommodation"))
+                .body("data.timestamp", equalTo(now))
+                .body("data.rating", equalTo(3))
+                .body("message", equalTo("Successfully added/updated accommodation review"));
+    }
+
+    @Test
+    @Order(21)
+    public void whenUpdateAccommodationReview_thenReturnUpdatedReview() {
+        Response response = RestAssured.given()
+                .contentType("application/json")
+                .body("{\"username\": \"gost\", \"password\": \"pera123\"}")
+                .when().post(loginEndpoint)
+                .then().extract().response();
+
+        jwt = response.getBody().jsonPath().getString("data");
+
+        AccommodationReview accommodationReview = new AccommodationReview();
+        accommodationReview.setAccommodationName("some-accommodation");
+        accommodationReview.setGuestEmail("gost@gmail.com");
+        accommodationReview.setRating(5);
+        long now = Instant.now().toEpochMilli();
+        accommodationReview.setTimestamp(now);
+        AccommodationReviewDTO accommodationReviewDTO = new AccommodationReviewDTO(accommodationReview);
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(accommodationReviewDTO)
+                .header("Authorization", "Bearer " + jwt)
+        .when()
+                .put(addAccommodationReviewEndpoint)
+        .then()
+                .statusCode(200)
+                .body("data.accommodationName", equalTo("some-accommodation"))
+                .body("data.timestamp", equalTo(now))
+                .body("data.rating", equalTo(5))
+                .body("message", equalTo("Successfully added/updated accommodation review"));
+    }
+
+    @Test
+    @Order(22)
+    public void whenRetrieveAccommodationsReviews_thenReturnReviewInfo() {
+        Response response = RestAssured.given()
+                .contentType("application/json")
+                .body("{\"username\": \"pera\", \"password\": \"pera123\"}")
+                .when().post(loginEndpoint)
+                .then().extract().response();
+
+        jwt = response.getBody().jsonPath().getString("data");
+
+        given()
+                .contentType(ContentType.JSON)
+                .header("Authorization", "Bearer " + jwt)
+        .when()
+                .get(accommodationReviewsInfoEndpoint)
+        .then()
+                .statusCode(200)
+                .body("data.reviews.size()", equalTo(1))
+                .body("data.avgRating", equalTo(5.0F))
+                .body("message", equalTo("Successfully retrieved accommodation reviews info"));
+    }
+
+    @Test
+    @Order(23)
+    public void whenDeleteAccommodationReview_thenReturnReviewInfo() {
+        Response response = RestAssured.given()
+                .contentType("application/json")
+                .body("{\"username\": \"gost\", \"password\": \"pera123\"}")
+                .when().post(loginEndpoint)
+                .then().extract().response();
+
+        jwt = response.getBody().jsonPath().getString("data");
+
+        given()
+                .contentType(ContentType.JSON)
+                .header("Authorization", "Bearer " + jwt)
+        .when()
+                .delete(deleteAccommodationReviewEndpoint)
+        .then()
+                .statusCode(200)
+                .body("data.deleted", equalTo(true))
+                .body("message", equalTo("Successfully deleted accommodation review"));
+    }
+
 }
 

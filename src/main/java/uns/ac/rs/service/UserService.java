@@ -6,11 +6,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import uns.ac.rs.dto.HostReviewDTO;
-import uns.ac.rs.dto.HostReviewInfoDTO;
+import uns.ac.rs.dto.*;
 import uns.ac.rs.dto.request.UserRequestDTO;
+import uns.ac.rs.model.AccommodationReview;
 import uns.ac.rs.model.HostReview;
 import uns.ac.rs.model.User;
+import uns.ac.rs.repository.AccommodationReviewRepository;
 import uns.ac.rs.repository.HostReviewRepository;
 import uns.ac.rs.repository.UserRepository;
 
@@ -28,6 +29,9 @@ public class UserService {
 
     @Autowired
     private HostReviewRepository hostReviewRepository;
+
+    @Autowired
+    private AccommodationReviewRepository accommodationReviewRepository;
 
     public List<User> getAllUsers(){
         logger.info("Getting all users");
@@ -123,19 +127,81 @@ public class UserService {
         float avgRating = 0;
         List<HostReviewDTO> hostReviewDTOS = new ArrayList<>();
         if (hostReviews.isPresent()) {
-            List<HostReview> extractedHostReview = hostReviews.get();
-            for (HostReview hostReview: extractedHostReview) {
+            List<HostReview> extractedHostReviews = hostReviews.get();
+            for (HostReview hostReview: extractedHostReviews) {
                 HostReviewDTO hostReviewDTO = new HostReviewDTO(hostReview);
                 hostReviewDTOS.add(hostReviewDTO);
                 avgRating += hostReview.getRating();
             }
-            avgRating /= extractedHostReview.size();
+            avgRating /= extractedHostReviews.size();
         }
         hostReviewInfoDTO.setReviews(hostReviewDTOS);
         hostReviewInfoDTO.setAvgRating(avgRating);
         return hostReviewInfoDTO;
     }
 
+    public AccommodationReviewInfoDTO getAccommodationReviewsInfo(String accommodationName) {
+        Optional<List<AccommodationReview>> accommodationReviews = accommodationReviewRepository
+                .findByAccommodationName(accommodationName);
+        AccommodationReviewInfoDTO accommodationReviewInfoDTO = new AccommodationReviewInfoDTO();
+        float avgRating = 0;
+        List<AccommodationReviewDTO> accommodationReviewDTOS = new ArrayList<>();
+        if (accommodationReviews.isPresent()) {
+            List<AccommodationReview> extractedAccommodationReviews = accommodationReviews.get();
+            for (AccommodationReview accommodationReview: extractedAccommodationReviews) {
+                AccommodationReviewDTO accommodationReviewDTO = new AccommodationReviewDTO(accommodationReview);
+                accommodationReviewDTOS.add(accommodationReviewDTO);
+                avgRating += accommodationReview.getRating();
+            }
+            avgRating /= extractedAccommodationReviews.size();
+        }
+        accommodationReviewInfoDTO.setReviews(accommodationReviewDTOS);
+        accommodationReviewInfoDTO.setAvgRating(avgRating);
+        return accommodationReviewInfoDTO;
+    }
+    public List<AccommodationReviewDTO> retrieveAccommodationReviews(String guestEmail,
+                                                                     List<Long> accommodationIds,
+                                                                     List<MinAccommodationDTO> minAccommodations) {
+        List<AccommodationReviewDTO> accommodationReviews = new ArrayList<>();
+        List<String> accommodationNames = extractNames(accommodationIds, minAccommodations);
+
+        for (String accommodationName: accommodationNames) {
+            Optional<AccommodationReview> accommodationReview = accommodationReviewRepository
+                    .findByGuestEmailAndAccommodationName(guestEmail, accommodationName);
+            if (accommodationReview.isPresent()) {
+                accommodationReviews.add(new AccommodationReviewDTO(accommodationReview.get()));
+            }
+            else {
+                accommodationReviews.add(new AccommodationReviewDTO());
+            }
+        }
+        return accommodationReviews;
+    }
+
+    public AccommodationReview addAccommodationReview(String guestEmail, AccommodationReviewDTO accommodationReviewDTO) {
+        Optional<AccommodationReview> accommodationReview = accommodationReviewRepository
+                .findByGuestEmailAndAccommodationName(guestEmail, accommodationReviewDTO.getAccommodationName());
+        AccommodationReview extractedAccommodationReview;
+        if (accommodationReview.isPresent()) {
+            extractedAccommodationReview = accommodationReview.get();
+            extractedAccommodationReview.setRating(accommodationReviewDTO.getRating());
+            extractedAccommodationReview.setTimestamp(accommodationReviewDTO.getTimestamp());
+        }
+        else {
+            extractedAccommodationReview = new AccommodationReview(accommodationReviewDTO, guestEmail);
+        }
+        accommodationReviewRepository.persist(extractedAccommodationReview);
+        return extractedAccommodationReview;
+    }
+
+    public AccommodationReview deleteAccommodationReview(String guestEmail, String accommodationName) {
+        Optional<AccommodationReview> accommodationReview = accommodationReviewRepository
+                .findByGuestEmailAndAccommodationName(guestEmail, accommodationName);
+        AccommodationReview extractedAccommodationReview = accommodationReview.get();
+        extractedAccommodationReview.setDeleted(true);
+        accommodationReviewRepository.persist(extractedAccommodationReview);
+        return extractedAccommodationReview;
+    }
     private void setUserAttributes(User user, UserRequestDTO userRequestDTO) {
         user.setFirstName(userRequestDTO.getFirstName());
         user.setLastName(userRequestDTO.getLastName());
@@ -143,5 +209,20 @@ public class UserService {
         user.setPassword(BcryptUtil.bcryptHash(userRequestDTO.getPassword()));
         user.setCity(userRequestDTO.getCity());
         user.setCountry(userRequestDTO.getCountry());
+    }
+
+    private List<String> extractNames(List<Long> accommodationIds, List<MinAccommodationDTO> minAccommodations) {
+        List<String> names = new ArrayList<>();
+
+        for (Long id : accommodationIds) {
+            for (MinAccommodationDTO accommodationDTO : minAccommodations) {
+                if (accommodationDTO.getId() == id) {
+                    names.add(accommodationDTO.getName());
+                    break;
+                }
+            }
+        }
+
+        return names;
     }
 }

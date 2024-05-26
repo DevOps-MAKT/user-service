@@ -6,11 +6,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uns.ac.rs.dto.HostReviewDTO;
-import uns.ac.rs.dto.HostReviewInfoDTO;
+import uns.ac.rs.dto.*;
 import uns.ac.rs.dto.request.UserRequestDTO;
+import uns.ac.rs.model.AccommodationReview;
 import uns.ac.rs.model.HostReview;
 import uns.ac.rs.model.User;
+import uns.ac.rs.repository.AccommodationReviewRepository;
 import uns.ac.rs.repository.HostReviewRepository;
 import uns.ac.rs.repository.UserRepository;
 import uns.ac.rs.service.UserService;
@@ -22,8 +23,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class UserServiceTests {
@@ -34,6 +34,8 @@ public class UserServiceTests {
     @Mock
     private HostReviewRepository hostReviewRepository;
 
+    @Mock
+    private AccommodationReviewRepository accommodationReviewRepository;
     @InjectMocks
     private UserService userService;
 
@@ -222,4 +224,117 @@ public class UserServiceTests {
         assertEquals(0, hostReviewInfoDTO.getReviews().size());
         assertEquals(0, hostReviewInfoDTO.getAvgRating());
     }
+
+    @Test
+    public void testGetAccommodationReviewsInfo() {
+        // Mock data
+        String accommodationName = "Accommodation";
+        AccommodationReview accommodationReview1 = new AccommodationReview();
+        accommodationReview1.setId(1L);
+        accommodationReview1.setAccommodationName(accommodationName);
+        accommodationReview1.setRating(5);
+        AccommodationReview accommodationReview2 = new AccommodationReview();
+        accommodationReview2.setId(2L);
+        accommodationReview2.setAccommodationName(accommodationName);
+        accommodationReview2.setRating(4);
+        when(accommodationReviewRepository.findByAccommodationName(accommodationName))
+                .thenReturn(Optional.of(Arrays.asList(accommodationReview1, accommodationReview2)));
+
+        AccommodationReviewInfoDTO reviewInfoDTO = userService.getAccommodationReviewsInfo(accommodationName);
+
+        assertNotNull(reviewInfoDTO);
+        assertEquals(2, reviewInfoDTO.getReviews().size());
+        assertEquals(4.5f, reviewInfoDTO.getAvgRating());
+    }
+
+    @Test
+    public void testRetrieveAccommodationReviews() {
+        String guestEmail = "guest@example.com";
+        List<Long> accommodationIds = Arrays.asList(1L, 2L);
+        List<MinAccommodationDTO> minAccommodations = Arrays.asList(
+                new MinAccommodationDTO(1L, "Accommodation 1"),
+                new MinAccommodationDTO(2L, "Accommodation 2")
+        );
+
+        AccommodationReview accommodationReview1 = new AccommodationReview();
+        accommodationReview1.setId(1L);
+        accommodationReview1.setAccommodationName("Accommodation 1");
+        accommodationReview1.setRating(5);
+        AccommodationReview accommodationReview2 = new AccommodationReview();
+        accommodationReview2.setId(2L);
+        accommodationReview2.setAccommodationName("Accommodation 2");
+        accommodationReview2.setRating(4);
+        when(accommodationReviewRepository.findByGuestEmailAndAccommodationName(eq(guestEmail), anyString()))
+                .thenReturn(Optional.of(accommodationReview1), Optional.of(accommodationReview2));
+
+        List<AccommodationReviewDTO> reviewDTOs = userService.retrieveAccommodationReviews(guestEmail, accommodationIds, minAccommodations);
+
+        assertNotNull(reviewDTOs);
+        assertEquals(2, reviewDTOs.size());
+        assertEquals(5, reviewDTOs.get(0).getRating());
+        assertEquals(4, reviewDTOs.get(1).getRating());
+    }
+
+    @Test
+    public void testAddAccommodationReview() {
+        String guestEmail = "guest@example.com";
+        AccommodationReviewDTO reviewDTO = new AccommodationReviewDTO();
+        reviewDTO.setAccommodationName("Accommodation");
+        reviewDTO.setRating(5);
+        reviewDTO.setTimestamp(System.currentTimeMillis());
+
+        AccommodationReview existingReview = new AccommodationReview();
+        existingReview.setId(1L);
+        existingReview.setGuestEmail(guestEmail);
+        existingReview.setAccommodationName("Accommodation");
+        existingReview.setRating(4);
+        existingReview.setTimestamp(System.currentTimeMillis() - 1000);
+        when(accommodationReviewRepository.findByGuestEmailAndAccommodationName(guestEmail, reviewDTO.getAccommodationName()))
+                .thenReturn(Optional.of(existingReview));
+
+        AccommodationReview addedReview = userService.addAccommodationReview(guestEmail, reviewDTO);
+
+        assertNotNull(addedReview);
+        assertEquals(existingReview.getId(), addedReview.getId());
+        assertEquals(5, addedReview.getRating());
+    }
+
+    @Test
+    public void testAddNewAccommodationReview() {
+        String guestEmail = "guest@example.com";
+        AccommodationReviewDTO reviewDTO = new AccommodationReviewDTO();
+        reviewDTO.setAccommodationName("New Accommodation");
+        reviewDTO.setRating(5);
+        reviewDTO.setTimestamp(System.currentTimeMillis());
+
+        when(accommodationReviewRepository.findByGuestEmailAndAccommodationName(guestEmail, reviewDTO.getAccommodationName()))
+                .thenReturn(Optional.empty());
+
+        AccommodationReview addedReview = userService.addAccommodationReview(guestEmail, reviewDTO);
+
+        assertNotNull(addedReview);
+        assertEquals(guestEmail, addedReview.getGuestEmail());
+        assertEquals("New Accommodation", addedReview.getAccommodationName());
+        assertEquals(5, addedReview.getRating());
+    }
+    @Test
+    public void testDeleteAccommodationReview() {
+        String guestEmail = "guest@example.com";
+        String accommodationName = "Accommodation";
+        AccommodationReview existingReview = new AccommodationReview();
+        existingReview.setId(1L);
+        existingReview.setGuestEmail(guestEmail);
+        existingReview.setAccommodationName(accommodationName);
+        existingReview.setDeleted(false);
+        when(accommodationReviewRepository.findByGuestEmailAndAccommodationName(guestEmail, accommodationName))
+                .thenReturn(Optional.of(existingReview));
+
+        AccommodationReview deletedReview = userService.deleteAccommodationReview(guestEmail, accommodationName);
+
+        assertNotNull(deletedReview);
+        assertTrue(deletedReview.isDeleted());
+        verify(accommodationReviewRepository, times(1)).persist(existingReview);
+    }
+
+
 }
