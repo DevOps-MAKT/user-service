@@ -14,10 +14,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import uns.ac.rs.GeneralResponse;
 import uns.ac.rs.MicroserviceCommunicator;
-import uns.ac.rs.dto.HostReviewDTO;
-import uns.ac.rs.dto.HostReviewInfoDTO;
+import uns.ac.rs.dto.*;
 import uns.ac.rs.dto.request.UserRequestDTO;
 import uns.ac.rs.dto.response.UserResponseDTO;
+import uns.ac.rs.model.AccommodationReview;
 import uns.ac.rs.model.HostReview;
 import uns.ac.rs.model.User;
 import uns.ac.rs.service.UserService;
@@ -214,6 +214,29 @@ public class UserController {
                 .build();
     }
 
+    @GET
+    @Path("/accommodation-reviews")
+    @RolesAllowed("guest")
+    public Response getAccommodationReviews(@Context SecurityContext ctx) {
+        String email = ctx.getUserPrincipal().getName();
+        GeneralResponse response = microserviceCommunicator.processResponse(
+                "http://localhost:8003/reservation-service/retrieve-reservation-accommodations/" + email,
+                "GET",
+                "");
+        List<Long> accommodationIds = (List<Long>) response.getData();
+
+        GeneralResponse minAccommodations = microserviceCommunicator.processResponse(
+                "http://localhost:8002/accommodation-service/retrieve-min-accommodations",
+                "GET",
+                "");
+        List<MinAccommodationDTO> minAccommodationDTOS = (List<MinAccommodationDTO>) minAccommodations.getData();
+        List<AccommodationReviewDTO> accommodationReviews = userService.retrieveAccommodationReviews(email, accommodationIds, minAccommodationDTOS);
+        return Response
+                .ok()
+                .entity(new GeneralResponse<>(accommodationReviews, "Successfully retrieved reviews"))
+                .build();
+    }
+
     @PUT
     @Path("/add-host-review")
     @RolesAllowed("guest")
@@ -226,6 +249,17 @@ public class UserController {
                 .build();
     }
 
+    @PUT
+    @Path("/add-accommodation-review")
+    @RolesAllowed("guest")
+    public Response addAccommodationReview(@Context SecurityContext ctx, AccommodationReviewDTO accommodationReviewDTO) {
+        String email = ctx.getUserPrincipal().getName();
+        AccommodationReview accommodationReview = userService.addAccommodationReview(email, accommodationReviewDTO);
+        return Response
+                .ok()
+                .entity(new GeneralResponse<>(new AccommodationReviewDTO(accommodationReview), "Successfully added/updated accommodation review"))
+                .build();
+    }
     @DELETE
     @Path("/delete-host-review/{host_email}")
     @RolesAllowed("guest")
@@ -235,6 +269,18 @@ public class UserController {
         return Response
                 .ok()
                 .entity(new GeneralResponse<>(new HostReviewDTO(deletedReview), "Successfully deleted host review"))
+                .build();
+    }
+
+    @DELETE
+    @Path("/delete-accommodation-review/{accommodation_name}")
+    @RolesAllowed("guest")
+    public Response deleteAccommodationReview(@Context SecurityContext ctx, @PathParam("accommodation_name") String accommodationName) {
+        String email = ctx.getUserPrincipal().getName();
+        AccommodationReview deletedReview = userService.deleteAccommodationReview(email, accommodationName);
+        return Response
+                .ok()
+                .entity(new GeneralResponse<>(new AccommodationReviewDTO(deletedReview), "Successfully deleted accommodation review"))
                 .build();
     }
 
@@ -250,5 +296,15 @@ public class UserController {
                 .build();
     }
 
+    @GET
+    @Path("/accommodation-reviews-info/{accommodation_name}")
+    @PermitAll
+    public Response getAccommodationReviewsInfo(@PathParam("accommodation_name") String accommodationName) {
+        AccommodationReviewInfoDTO accommodationReviewInfoDTO = userService.getAccommodationReviewsInfo(accommodationName);
+        return Response
+                .ok()
+                .entity(new GeneralResponse<>(accommodationReviewInfoDTO, "Successfully retrieved accommodation reviews info"))
+                .build();
+    }
 
 }
