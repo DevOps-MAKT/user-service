@@ -6,11 +6,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import uns.ac.rs.dto.HostReviewDTO;
+import uns.ac.rs.dto.HostReviewInfoDTO;
 import uns.ac.rs.dto.request.UserRequestDTO;
+import uns.ac.rs.model.HostReview;
 import uns.ac.rs.model.User;
+import uns.ac.rs.repository.HostReviewRepository;
 import uns.ac.rs.repository.UserRepository;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional
@@ -19,6 +25,9 @@ public class UserService {
     private static final Logger logger = LoggerFactory.getLogger(UserService.class);
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private HostReviewRepository hostReviewRepository;
 
     public List<User> getAllUsers(){
         logger.info("Getting all users");
@@ -69,6 +78,62 @@ public class UserService {
     public void deactivateUser(String email) {
         User user = userRepository.findByEmail(email);
         user.setActive(false);
+    }
+
+    public List<HostReviewDTO> retrieveHostReviews(List<String> hostEmails, String guestEmail) {
+        List<HostReviewDTO> hostReviews = new ArrayList<>();
+        for (String hostEmail: hostEmails) {
+            Optional<HostReview> hostReview = hostReviewRepository.findByGuestEmailAndHostEmail(guestEmail, hostEmail);
+            if (hostReview.isPresent()) {
+                hostReviews.add(new HostReviewDTO(hostReview.get()));
+            }
+            else {
+                hostReviews.add(new HostReviewDTO());
+            }
+        }
+        return hostReviews;
+    }
+
+    public HostReview addHostReview(String guestEmail, HostReviewDTO hostReviewDTO) {
+        Optional<HostReview> hostReview = hostReviewRepository.findByGuestEmailAndHostEmail(guestEmail, hostReviewDTO.getHostEmail());
+        HostReview extractedHostReview;
+        if (hostReview.isPresent()) {
+            extractedHostReview = hostReview.get();
+            extractedHostReview.setRating(hostReviewDTO.getRating());
+            extractedHostReview.setTimestamp(hostReviewDTO.getTimestamp());
+        }
+        else {
+            extractedHostReview = new HostReview(hostReviewDTO, guestEmail);
+        }
+        hostReviewRepository.persist(extractedHostReview);
+        return extractedHostReview;
+    }
+
+    public HostReview deleteHostReview(String guestEmail, String hostEmail) {
+        Optional<HostReview> hostReview = hostReviewRepository.findByGuestEmailAndHostEmail(guestEmail, hostEmail);
+        HostReview extractedHostReview = hostReview.get();
+        extractedHostReview.setDeleted(true);
+        hostReviewRepository.persist(extractedHostReview);
+        return extractedHostReview;
+    }
+
+    public HostReviewInfoDTO getHostReviewsInfo(String hostEmail) {
+        Optional<List<HostReview>> hostReviews = hostReviewRepository.findByHostEmail(hostEmail);
+        HostReviewInfoDTO hostReviewInfoDTO = new HostReviewInfoDTO();
+        float avgRating = 0;
+        List<HostReviewDTO> hostReviewDTOS = new ArrayList<>();
+        if (hostReviews.isPresent()) {
+            List<HostReview> extractedHostReview = hostReviews.get();
+            for (HostReview hostReview: extractedHostReview) {
+                HostReviewDTO hostReviewDTO = new HostReviewDTO(hostReview);
+                hostReviewDTOS.add(hostReviewDTO);
+                avgRating += hostReview.getRating();
+            }
+            avgRating /= extractedHostReview.size();
+        }
+        hostReviewInfoDTO.setReviews(hostReviewDTOS);
+        hostReviewInfoDTO.setAvgRating(avgRating);
+        return hostReviewInfoDTO;
     }
 
     private void setUserAttributes(User user, UserRequestDTO userRequestDTO) {

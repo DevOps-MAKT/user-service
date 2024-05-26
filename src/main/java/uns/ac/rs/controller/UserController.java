@@ -14,8 +14,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import uns.ac.rs.GeneralResponse;
 import uns.ac.rs.MicroserviceCommunicator;
+import uns.ac.rs.dto.HostReviewDTO;
+import uns.ac.rs.dto.HostReviewInfoDTO;
 import uns.ac.rs.dto.request.UserRequestDTO;
 import uns.ac.rs.dto.response.UserResponseDTO;
+import uns.ac.rs.model.HostReview;
 import uns.ac.rs.model.User;
 import uns.ac.rs.service.UserService;
 
@@ -191,6 +194,59 @@ public class UserController {
         return Response
                 .status(Response.Status.OK)
                 .entity(new GeneralResponse<>(true, "Successfully terminated account"))
+                .build();
+    }
+
+    @GET
+    @Path("/host-reviews")
+    @RolesAllowed("guest")
+    public Response getHostReviews(@Context SecurityContext ctx) {
+        String email = ctx.getUserPrincipal().getName();
+        GeneralResponse response = microserviceCommunicator.processResponse(
+                "http://localhost:8003/reservation-service/retrieve-reservation-hosts/" + email,
+                "GET",
+                "");
+        List<String> hostEmails = (List<String>) response.getData();
+        List<HostReviewDTO> reviewDTOS = userService.retrieveHostReviews(hostEmails, email);
+        return Response
+                .ok()
+                .entity(new GeneralResponse<>(reviewDTOS, "Successfully retrieved reviews"))
+                .build();
+    }
+
+    @PUT
+    @Path("/add-host-review")
+    @RolesAllowed("guest")
+    public Response addHostReview(@Context SecurityContext ctx, HostReviewDTO hostReviewDTO) {
+        String email = ctx.getUserPrincipal().getName();
+        HostReview addedReview = userService.addHostReview(email, hostReviewDTO);
+        return Response
+                .ok()
+                .entity(new GeneralResponse<>(new HostReviewDTO(addedReview), "Successfully added/updated host review"))
+                .build();
+    }
+
+    @DELETE
+    @Path("/delete-host-review/{host_email}")
+    @RolesAllowed("guest")
+    public Response deleteHostReview(@Context SecurityContext ctx, @PathParam("host_email") String hostEmail) {
+        String email = ctx.getUserPrincipal().getName();
+        HostReview deletedReview = userService.deleteHostReview(email, hostEmail);
+        return Response
+                .ok()
+                .entity(new GeneralResponse<>(new HostReviewDTO(deletedReview), "Successfully deleted host review"))
+                .build();
+    }
+
+    @GET
+    @Path("/host-reviews-info")
+    @RolesAllowed("host")
+    public Response getHostReviewsInfo(@Context SecurityContext ctx) {
+        String email = ctx.getUserPrincipal().getName();
+        HostReviewInfoDTO hostReviewInfoDTO = userService.getHostReviewsInfo(email);
+        return Response
+                .ok()
+                .entity(new GeneralResponse<>(hostReviewInfoDTO, "Successfully retrieved host reviews info"))
                 .build();
     }
 
