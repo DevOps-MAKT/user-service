@@ -12,12 +12,16 @@ import uns.ac.rs.GeneralResponse;
 import uns.ac.rs.MicroserviceCommunicator;
 import uns.ac.rs.controller.AuthController;
 import uns.ac.rs.controller.UserController;
+import uns.ac.rs.dto.HostReviewDTO;
+import uns.ac.rs.model.HostReview;
 
 import java.net.URL;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 import static io.restassured.RestAssured.given;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.*;
 import static org.mockito.Mockito.doReturn;
 
 @QuarkusTest
@@ -68,6 +72,22 @@ public class UserControllerTests {
     @TestHTTPEndpoint(UserController.class)
     @TestHTTPResource("terminate-host")
     URL terminateHostEndpoint;
+
+    @TestHTTPEndpoint(UserController.class)
+    @TestHTTPResource("host-reviews")
+    URL getHostReviewsEndpoint;
+
+    @TestHTTPEndpoint(UserController.class)
+    @TestHTTPResource("add-host-review")
+    URL addHostReviewEndpoint;
+
+    @TestHTTPEndpoint(UserController.class)
+    @TestHTTPResource("delete-host-review/pera@gmail.com")
+    URL deleteHostReviewEndpoint;
+
+    @TestHTTPEndpoint(UserController.class)
+    @TestHTTPResource("host-reviews-info")
+    URL hostReviewsInfoEndpoint;
 
     @BeforeEach
     public void login(){
@@ -392,6 +412,147 @@ public class UserControllerTests {
                 .statusCode(200)
                 .body("data", equalTo(true))
                 .body("message", equalTo("Successfully terminated account"));
+    }
+
+    @Test
+    @Order(14)
+    public void whenGetOneHostWithoutSentReview_thenReturnNewEmptyReview() {
+        Response response = RestAssured.given()
+                .contentType("application/json")
+                .body("{\"username\": \"gost\", \"password\": \"pera123\"}")
+                .when().post(loginEndpoint)
+                .then().extract().response();
+
+        jwt = response.getBody().jsonPath().getString("data");
+
+        List<String> hostEmails = new ArrayList<>();
+        hostEmails.add("pera@gmail.com");
+        doReturn(new GeneralResponse(hostEmails, "200"))
+                .when(microserviceCommunicator)
+                .processResponse("http://localhost:8003/reservation-service/retrieve-reservation-hosts/gost@gmail.com",
+                        "GET",
+                        "");
+
+        given()
+                .contentType(ContentType.JSON)
+                .header("Authorization", "Bearer " + jwt)
+        .when()
+                .get(getHostReviewsEndpoint)
+        .then()
+                .statusCode(200)
+                .body("data.size()", equalTo(1))
+                .body("message", equalTo("Successfully retrieved reviews"));
+    }
+
+    @Test
+    @Order(15)
+    public void whenCreateReview_thenReturnCreatedReview() {
+        Response response = RestAssured.given()
+                .contentType("application/json")
+                .body("{\"username\": \"gost\", \"password\": \"pera123\"}")
+                .when().post(loginEndpoint)
+                .then().extract().response();
+
+        jwt = response.getBody().jsonPath().getString("data");
+
+        HostReview hostReview = new HostReview();
+        hostReview.setHostEmail("pera@gmail.com");
+        hostReview.setGuestEmail("gost@gmail.com");
+        hostReview.setRating(3);
+        long now = Instant.now().toEpochMilli();
+        hostReview.setTimestamp(now);
+        HostReviewDTO hostReviewDTO = new HostReviewDTO(hostReview);
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(hostReviewDTO)
+                .header("Authorization", "Bearer " + jwt)
+        .when()
+                .put(addHostReviewEndpoint)
+        .then()
+                .statusCode(200)
+                .body("data.hostEmail", equalTo("pera@gmail.com"))
+                .body("data.timestamp", equalTo(now))
+                .body("data.rating", equalTo(3))
+                .body("message", equalTo("Successfully added/updated host review"));
+    }
+
+    @Test
+    @Order(16)
+    public void whenUpdateReview_thenReturnUpdatedReview() {
+        Response response = RestAssured.given()
+                .contentType("application/json")
+                .body("{\"username\": \"gost\", \"password\": \"pera123\"}")
+                .when().post(loginEndpoint)
+                .then().extract().response();
+
+        jwt = response.getBody().jsonPath().getString("data");
+
+        HostReview hostReview = new HostReview();
+        hostReview.setHostEmail("pera@gmail.com");
+        hostReview.setGuestEmail("gost@gmail.com");
+        hostReview.setRating(5);
+        long now = Instant.now().toEpochMilli();
+        hostReview.setTimestamp(now);
+        HostReviewDTO hostReviewDTO = new HostReviewDTO(hostReview);
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(hostReviewDTO)
+                .header("Authorization", "Bearer " + jwt)
+        .when()
+                .put(addHostReviewEndpoint)
+        .then()
+                .statusCode(200)
+                .body("data.hostEmail", equalTo("pera@gmail.com"))
+                .body("data.timestamp", equalTo(now))
+                .body("data.rating", equalTo(5))
+                .body("message", equalTo("Successfully added/updated host review"));
+    }
+
+    @Test
+    @Order(17)
+    public void whenRetrieveHostsReviews_thenReturnReviewInfo() {
+        Response response = RestAssured.given()
+                .contentType("application/json")
+                .body("{\"username\": \"pera\", \"password\": \"pera123\"}")
+                .when().post(loginEndpoint)
+                .then().extract().response();
+
+        jwt = response.getBody().jsonPath().getString("data");
+
+        given()
+                .contentType(ContentType.JSON)
+                .header("Authorization", "Bearer " + jwt)
+        .when()
+                .get(hostReviewsInfoEndpoint)
+        .then()
+                .statusCode(200)
+                .body("data.reviews.size()", equalTo(1))
+                .body("data.avgRating", equalTo(5.0F))
+                .body("message", equalTo("Successfully retrieved host reviews info"));
+    }
+
+    @Test
+    @Order(18)
+    public void whenDeleteHostReview_thenReturnReviewInfo() {
+        Response response = RestAssured.given()
+                .contentType("application/json")
+                .body("{\"username\": \"gost\", \"password\": \"pera123\"}")
+                .when().post(loginEndpoint)
+                .then().extract().response();
+
+        jwt = response.getBody().jsonPath().getString("data");
+
+        given()
+                .contentType(ContentType.JSON)
+                .header("Authorization", "Bearer " + jwt)
+        .when()
+                .delete(deleteHostReviewEndpoint)
+        .then()
+                .statusCode(200)
+                .body("data.deleted", equalTo(true))
+                .body("message", equalTo("Successfully deleted host review"));
     }
 }
 
