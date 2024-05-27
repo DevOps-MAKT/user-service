@@ -3,7 +3,6 @@ package uns.ac.rs.model;
 import jakarta.persistence.*;
 import lombok.Data;
 import uns.ac.rs.dto.AccommodationReviewDTO;
-import uns.ac.rs.dto.HostReviewDTO;
 
 @Entity
 @Table(name = "accommodation_review")
@@ -30,6 +29,14 @@ public class AccommodationReview {
 
     public AccommodationReview() {
 
+    }
+
+    public AccommodationReview(String guestEmail, String accommodationName, Long timestamp, Integer rating, boolean deleted) {
+        this.guestEmail = guestEmail;
+        this.accommodationName = accommodationName;
+        this.timestamp = timestamp;
+        this.rating = rating;
+        this.deleted = deleted;
     }
 
     public AccommodationReview(AccommodationReviewDTO accommodationReviewDTO, String guestEmail) {

@@ -307,4 +307,15 @@ public class UserController {
                 .build();
     }
 
+    @GET
+    @Path("/avg-rating/{accommodation_name}")
+    @PermitAll
+    public Response getAvgRating(@PathParam("accommodation_name") String accommodationName) {
+        float avgRating = userService.getAvgRating(accommodationName);
+        return Response
+                .ok()
+                .entity(new GeneralResponse<>(avgRating, "Successfully retrieved accommodation rating"))
+                .build();
+    }
+
 }
