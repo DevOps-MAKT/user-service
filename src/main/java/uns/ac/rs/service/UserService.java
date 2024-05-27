@@ -126,7 +126,7 @@ public class UserService {
         HostReviewInfoDTO hostReviewInfoDTO = new HostReviewInfoDTO();
         float avgRating = 0;
         List<HostReviewDTO> hostReviewDTOS = new ArrayList<>();
-        if (hostReviews.isPresent()) {
+        if (hostReviews.isPresent() && hostReviews.get().size() > 0) {
             List<HostReview> extractedHostReviews = hostReviews.get();
             for (HostReview hostReview: extractedHostReviews) {
                 HostReviewDTO hostReviewDTO = new HostReviewDTO(hostReview);
@@ -146,7 +146,7 @@ public class UserService {
         AccommodationReviewInfoDTO accommodationReviewInfoDTO = new AccommodationReviewInfoDTO();
         float avgRating = 0;
         List<AccommodationReviewDTO> accommodationReviewDTOS = new ArrayList<>();
-        if (accommodationReviews.isPresent()) {
+        if (accommodationReviews.isPresent() && accommodationReviews.get().size() > 0) {
             List<AccommodationReview> extractedAccommodationReviews = accommodationReviews.get();
             for (AccommodationReview accommodationReview: extractedAccommodationReviews) {
                 AccommodationReviewDTO accommodationReviewDTO = new AccommodationReviewDTO(accommodationReview);
@@ -158,6 +158,19 @@ public class UserService {
         accommodationReviewInfoDTO.setReviews(accommodationReviewDTOS);
         accommodationReviewInfoDTO.setAvgRating(avgRating);
         return accommodationReviewInfoDTO;
+    }
+
+    public float getAvgRating(String accommodationName) {
+        float avgRating = 0;
+        Optional<List<AccommodationReview>> accommodationReviews = accommodationReviewRepository
+                .findByAccommodationName(accommodationName);
+        if (accommodationReviews.isPresent() && accommodationReviews.get().size() > 0) {
+            for (AccommodationReview accommodationReview: accommodationReviews.get()) {
+                avgRating += accommodationReview.getRating();
+            }
+            avgRating /= accommodationReviews.get().size();
+        }
+        return avgRating;
     }
     public List<AccommodationReviewDTO> retrieveAccommodationReviews(String guestEmail,
                                                                      List<Long> accommodationIds,

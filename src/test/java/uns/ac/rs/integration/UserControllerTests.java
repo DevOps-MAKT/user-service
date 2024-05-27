@@ -108,6 +108,10 @@ public class UserControllerTests {
     @TestHTTPResource("accommodation-reviews-info/some-accommodation")
     URL accommodationReviewsInfoEndpoint;
 
+    @TestHTTPEndpoint(UserController.class)
+    @TestHTTPResource("avg-rating/some-accommodation")
+    URL getAvgRatingEndpoint;
+
     @BeforeEach
     public void login(){
         Response response = RestAssured.given()
@@ -725,5 +729,26 @@ public class UserControllerTests {
                 .body("message", equalTo("Successfully deleted accommodation review"));
     }
 
+    @Test
+    @Order(24)
+    public void whenGetAvgRatingAccommodation_thenReturnAvgRating() {
+        Response response = RestAssured.given()
+                .contentType("application/json")
+                .body("{\"username\": \"gost\", \"password\": \"pera123\"}")
+                .when().post(loginEndpoint)
+                .then().extract().response();
+
+        jwt = response.getBody().jsonPath().getString("data");
+
+        given()
+                .contentType(ContentType.JSON)
+                .header("Authorization", "Bearer " + jwt)
+        .when()
+                .get(getAvgRatingEndpoint)
+        .then()
+                .statusCode(200)
+                .body("data", equalTo(0f))
+                .body("message", equalTo("Successfully retrieved accommodation rating"));
+    }
 }
 

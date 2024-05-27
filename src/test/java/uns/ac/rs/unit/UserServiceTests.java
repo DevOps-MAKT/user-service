@@ -16,6 +16,7 @@ import uns.ac.rs.repository.HostReviewRepository;
 import uns.ac.rs.repository.UserRepository;
 import uns.ac.rs.service.UserService;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -335,6 +336,23 @@ public class UserServiceTests {
         assertTrue(deletedReview.isDeleted());
         verify(accommodationReviewRepository, times(1)).persist(existingReview);
     }
+    @Test
+    public void testGetAvgRating() {
+
+        // Create test data
+        List<AccommodationReview> reviews = new ArrayList<>();
+        reviews.add(new AccommodationReview("email1", "Accommodation1", 123456L, 4, false));
+        reviews.add(new AccommodationReview("email2", "Accommodation1", 123457L, 5, false));
+        reviews.add(new AccommodationReview("email3", "Accommodation1", 123458L, 3, false));
+
+        when(accommodationReviewRepository.findByAccommodationName("Accommodation1"))
+                .thenReturn(Optional.of(reviews));
+
+        float avgRating = userService.getAvgRating("Accommodation1");
+
+        assertEquals(4.0f, avgRating, 0.01);
+    }
+
 
 
 }
