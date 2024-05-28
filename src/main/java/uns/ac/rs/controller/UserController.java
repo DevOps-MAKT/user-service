@@ -84,6 +84,23 @@ public class UserController {
         }
     }
 
+    @PATCH
+    @Path("/update-password")
+    @RolesAllowed({"host", "admin", "guest"})
+    public Response updatePassword(@Context SecurityContext ctx, PasswordDTO passwordDTO) {
+        if (!passwordDTO.getPassword().equals(passwordDTO.getConfirmationPassword())) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(new GeneralResponse<>("", "Passwords aren't matching"))
+                    .build();
+        }
+        String email = ctx.getUserPrincipal().getName();
+        User user = userService.updatePassword(email, passwordDTO);
+        return Response
+                .ok()
+                .entity(new GeneralResponse<>(new UserResponseDTO(user), "Password successfully changed"))
+                .build();
+    }
+
     @GET
     @Path("/retrieve-current-user-info")
     @RolesAllowed({"host", "admin", "guest"})

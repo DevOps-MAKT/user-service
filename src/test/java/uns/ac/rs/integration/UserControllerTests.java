@@ -15,6 +15,7 @@ import uns.ac.rs.controller.UserController;
 import uns.ac.rs.dto.AccommodationReviewDTO;
 import uns.ac.rs.dto.HostReviewDTO;
 import uns.ac.rs.dto.MinAccommodationDTO;
+import uns.ac.rs.dto.PasswordDTO;
 import uns.ac.rs.model.AccommodationReview;
 import uns.ac.rs.model.HostReview;
 
@@ -112,6 +113,10 @@ public class UserControllerTests {
     @TestHTTPResource("avg-rating/some-accommodation")
     URL getAvgRatingEndpoint;
 
+    @TestHTTPEndpoint(UserController.class)
+    @TestHTTPResource("update-password")
+    URL updatePasswordEndpoint;
+
     @BeforeEach
     public void login(){
         Response response = RestAssured.given()
@@ -181,7 +186,6 @@ public class UserControllerTests {
     public void whenUpdateUser_thenReturnOk() {
         String requestBody = "{" +
                 "\"username\": \"admin\"," +
-                "\"password\": \"admin123\"," +
                 "\"firstName\": \"new-Someone\"," +
                 "\"lastName\": \"new-Something\"," +
                 "\"country\": \"Serbia\"," +
@@ -749,6 +753,25 @@ public class UserControllerTests {
                 .statusCode(200)
                 .body("data", equalTo(0f))
                 .body("message", equalTo("Successfully retrieved accommodation rating"));
+    }
+
+    @Test
+    @Order(25)
+    public void whenUpdateUserPassword_thenReturnUserWithUpdatedCredentials() {
+        PasswordDTO passwordDTO = new PasswordDTO();
+        passwordDTO.setPassword("abc");
+        passwordDTO.setConfirmationPassword("abc");
+
+        given()
+                .contentType(ContentType.JSON)
+                .header("Authorization", "Bearer " + jwt)
+                .body(passwordDTO)
+        .when()
+                .patch(updatePasswordEndpoint)
+        .then()
+                .statusCode(200)
+                .body("data", notNullValue())
+                .body("message", equalTo("Password successfully changed"));
     }
 }
 
