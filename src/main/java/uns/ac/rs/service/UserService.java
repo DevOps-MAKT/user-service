@@ -51,6 +51,13 @@ public class UserService {
         return user;
     }
 
+    public User updatePassword(String email, PasswordDTO passwordDTO) {
+        User user = userRepository.findByEmail(email);
+        user.setPassword(BcryptUtil.bcryptHash(passwordDTO.getPassword()));
+        userRepository.persist(user);
+        return user;
+    }
+
     public User retrieveCurrentUser(String email) {
         return userRepository.findByEmail(email);
     }
@@ -219,7 +226,6 @@ public class UserService {
         user.setFirstName(userRequestDTO.getFirstName());
         user.setLastName(userRequestDTO.getLastName());
         user.setUsername(userRequestDTO.getUsername());
-        user.setPassword(BcryptUtil.bcryptHash(userRequestDTO.getPassword()));
         user.setCity(userRequestDTO.getCity());
         user.setCountry(userRequestDTO.getCountry());
     }

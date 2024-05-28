@@ -65,7 +65,6 @@ public class UserServiceTests {
 
         assertNotNull(updatedUser);
         assertEquals(updatedUser.getUsername(), mockUserRequestDTO.getUsername());
-        assertTrue(BcryptUtil.matches(mockUserRequestDTO.getPassword(), updatedUser.getPassword()));
         assertEquals(updatedUser.getFirstName(), mockUserRequestDTO.getFirstName());
         assertEquals(updatedUser.getLastName(), mockUserRequestDTO.getLastName());
     }
