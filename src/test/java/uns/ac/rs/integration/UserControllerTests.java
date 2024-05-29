@@ -16,7 +16,6 @@ import uns.ac.rs.dto.AccommodationReviewDTO;
 import uns.ac.rs.dto.HostReviewDTO;
 import uns.ac.rs.dto.MinAccommodationDTO;
 import uns.ac.rs.dto.PasswordDTO;
-import uns.ac.rs.dto.response.JWTResponse;
 import uns.ac.rs.model.AccommodationReview;
 import uns.ac.rs.model.HostReview;
 
@@ -371,36 +370,6 @@ public class UserControllerTests {
 
     @Test
     @Order(11)
-    public void whenTerminateGuestWithoutReservations_thenCanTerminate() {
-        Response response = RestAssured.given()
-                .contentType("application/json")
-                .body("{\"username\": \"gost\", \"password\": \"pera123\"}")
-                .when().post(loginEndpoint)
-                .then().extract().response();
-
-        GeneralResponse generalResponse = response.as(GeneralResponse.class);
-        LinkedHashMap data = (LinkedHashMap) generalResponse.getData();
-        jwt = (String) data.get("jwt");
-
-        doReturn(new GeneralResponse(false, "200"))
-                .when(microserviceCommunicator)
-                .processResponse("http://localhost:8003/reservation-service/reservation/are-reservations-active/gost@gmail.com",
-                        "GET",
-                        "Bearer " + jwt);
-
-        given()
-                .contentType(ContentType.JSON)
-                .header("Authorization", "Bearer " + jwt)
-        .when()
-                .patch(terminateGuestEndpoint)
-        .then()
-                .statusCode(200)
-                .body("data", equalTo(true))
-                .body("message", equalTo("Successfully terminated account"));
-    }
-
-    @Test
-    @Order(12)
     public void whenTerminateHostWithActiveReservations_thenCantTerminate() {
         Response response = RestAssured.given()
                 .contentType("application/json")
@@ -430,43 +399,7 @@ public class UserControllerTests {
     }
 
     @Test
-    @Order(13)
-    public void whenTerminateHostWithNoActiveReservations_thenCanTerminate() {
-        Response response = RestAssured.given()
-                .contentType("application/json")
-                .body("{\"username\": \"pera\", \"password\": \"pera123\"}")
-                .when().post(loginEndpoint)
-                .then().extract().response();
-
-        GeneralResponse generalResponse = response.as(GeneralResponse.class);
-        LinkedHashMap data = (LinkedHashMap) generalResponse.getData();
-        jwt = (String) data.get("jwt");
-
-        doReturn(new GeneralResponse(false, "200"))
-                .when(microserviceCommunicator)
-                .processResponse("http://localhost:8003/reservation-service/reservation/do-active-reservations-exist/pera@gmail.com",
-                        "GET",
-                        "Bearer " + jwt);
-
-        doReturn(new GeneralResponse(true, "200"))
-                .when(microserviceCommunicator)
-                .processResponse("http://localhost:8002/accommodation-service/accommodation/deactivate-hosts-accommodations/pera@gmail.com",
-                        "PATCH",
-                        "Bearer " + jwt);
-
-        given()
-                .contentType(ContentType.JSON)
-                .header("Authorization", "Bearer " + jwt)
-        .when()
-                .patch(terminateHostEndpoint)
-        .then()
-                .statusCode(200)
-                .body("data", equalTo(true))
-                .body("message", equalTo("Successfully terminated account"));
-    }
-
-    @Test
-    @Order(14)
+    @Order(12)
     public void whenGetOneHostWithoutSentReview_thenReturnNewEmptyReview() {
         Response response = RestAssured.given()
                 .contentType("application/json")
@@ -498,7 +431,7 @@ public class UserControllerTests {
     }
 
     @Test
-    @Order(15)
+    @Order(13)
     public void whenCreateReview_thenReturnCreatedReview() {
         Response response = RestAssured.given()
                 .contentType("application/json")
@@ -533,7 +466,7 @@ public class UserControllerTests {
     }
 
     @Test
-    @Order(16)
+    @Order(14)
     public void whenUpdateReview_thenReturnUpdatedReview() {
         Response response = RestAssured.given()
                 .contentType("application/json")
@@ -568,7 +501,7 @@ public class UserControllerTests {
     }
 
     @Test
-    @Order(17)
+    @Order(15)
     public void whenRetrieveHostsReviews_thenReturnReviewInfo() {
         Response response = RestAssured.given()
                 .contentType("application/json")
@@ -593,7 +526,7 @@ public class UserControllerTests {
     }
 
     @Test
-    @Order(18)
+    @Order(16)
     public void whenDeleteHostReview_thenReturnReviewInfo() {
         Response response = RestAssured.given()
                 .contentType("application/json")
@@ -617,7 +550,7 @@ public class UserControllerTests {
     }
 
     @Test
-    @Order(19)
+    @Order(17)
     public void whenGetOneAccommodationWithoutSentReview_thenReturnNewEmptyReview() {
         Response response = RestAssured.given()
                 .contentType("application/json")
@@ -659,7 +592,7 @@ public class UserControllerTests {
     }
 
     @Test
-    @Order(20)
+    @Order(18)
     public void whenCreateAccommodationReview_thenReturnCreatedReview() {
         Response response = RestAssured.given()
                 .contentType("application/json")
@@ -694,7 +627,7 @@ public class UserControllerTests {
     }
 
     @Test
-    @Order(21)
+    @Order(19)
     public void whenUpdateAccommodationReview_thenReturnUpdatedReview() {
         Response response = RestAssured.given()
                 .contentType("application/json")
@@ -729,7 +662,7 @@ public class UserControllerTests {
     }
 
     @Test
-    @Order(22)
+    @Order(20)
     public void whenRetrieveAccommodationsReviews_thenReturnReviewInfo() {
         Response response = RestAssured.given()
                 .contentType("application/json")
@@ -754,7 +687,7 @@ public class UserControllerTests {
     }
 
     @Test
-    @Order(23)
+    @Order(21)
     public void whenDeleteAccommodationReview_thenReturnReviewInfo() {
         Response response = RestAssured.given()
                 .contentType("application/json")
@@ -778,7 +711,7 @@ public class UserControllerTests {
     }
 
     @Test
-    @Order(24)
+    @Order(22)
     public void whenGetAvgRatingAccommodation_thenReturnAvgRating() {
         Response response = RestAssured.given()
                 .contentType("application/json")
@@ -802,11 +735,11 @@ public class UserControllerTests {
     }
 
     @Test
-    @Order(25)
+    @Order(23)
     public void whenUpdateUserPassword_thenReturnUserWithUpdatedCredentials() {
         PasswordDTO passwordDTO = new PasswordDTO();
-        passwordDTO.setPassword("abc");
-        passwordDTO.setConfirmationPassword("abc");
+        passwordDTO.setPassword("admin123");
+        passwordDTO.setConfirmationPassword("admin123");
 
         given()
                 .contentType(ContentType.JSON)
@@ -818,6 +751,73 @@ public class UserControllerTests {
                 .statusCode(200)
                 .body("data", notNullValue())
                 .body("message", equalTo("Password successfully changed"));
+    }
+
+
+    @Test
+    @Order(24)
+    public void whenTerminateGuestWithoutReservations_thenCanTerminate() {
+        Response response = RestAssured.given()
+                .contentType("application/json")
+                .body("{\"username\": \"gost\", \"password\": \"pera123\"}")
+                .when().post(loginEndpoint)
+                .then().extract().response();
+
+        GeneralResponse generalResponse = response.as(GeneralResponse.class);
+        LinkedHashMap data = (LinkedHashMap) generalResponse.getData();
+        jwt = (String) data.get("jwt");
+
+        doReturn(new GeneralResponse(false, "200"))
+                .when(microserviceCommunicator)
+                .processResponse("http://localhost:8003/reservation-service/reservation/are-reservations-active/gost@gmail.com",
+                        "GET",
+                        "Bearer " + jwt);
+
+        given()
+                .contentType(ContentType.JSON)
+                .header("Authorization", "Bearer " + jwt)
+                .when()
+                .patch(terminateGuestEndpoint)
+                .then()
+                .statusCode(200)
+                .body("data", equalTo(true))
+                .body("message", equalTo("Successfully terminated account"));
+    }
+
+    @Test
+    @Order(25)
+    public void whenTerminateHostWithNoActiveReservations_thenCanTerminate() {
+        Response response = RestAssured.given()
+                .contentType("application/json")
+                .body("{\"username\": \"pera\", \"password\": \"pera123\"}")
+                .when().post(loginEndpoint)
+                .then().extract().response();
+
+        GeneralResponse generalResponse = response.as(GeneralResponse.class);
+        LinkedHashMap data = (LinkedHashMap) generalResponse.getData();
+        jwt = (String) data.get("jwt");
+
+        doReturn(new GeneralResponse(false, "200"))
+                .when(microserviceCommunicator)
+                .processResponse("http://localhost:8003/reservation-service/reservation/do-active-reservations-exist/pera@gmail.com",
+                        "GET",
+                        "Bearer " + jwt);
+
+        doReturn(new GeneralResponse(true, "200"))
+                .when(microserviceCommunicator)
+                .processResponse("http://localhost:8002/accommodation-service/accommodation/deactivate-hosts-accommodations/pera@gmail.com",
+                        "PATCH",
+                        "Bearer " + jwt);
+
+        given()
+                .contentType(ContentType.JSON)
+                .header("Authorization", "Bearer " + jwt)
+                .when()
+                .patch(terminateHostEndpoint)
+                .then()
+                .statusCode(200)
+                .body("data", equalTo(true))
+                .body("message", equalTo("Successfully terminated account"));
     }
 }
 
