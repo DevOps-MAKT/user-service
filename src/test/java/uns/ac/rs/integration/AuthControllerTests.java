@@ -7,10 +7,14 @@ import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.*;
+import uns.ac.rs.GeneralResponse;
 import uns.ac.rs.controller.AuthController;
+import uns.ac.rs.dto.response.JWTResponse;
+
 import static org.hamcrest.Matchers.*;
 
 import java.net.URL;
+import java.util.LinkedHashMap;
 
 import static io.restassured.RestAssured.given;
 
@@ -39,8 +43,9 @@ public class AuthControllerTests {
                 .when().post(loginEndpoint)
                 .then().extract().response();
 
-        jwt = response.getBody().jsonPath().getString("data");
-
+        GeneralResponse generalResponse = response.as(GeneralResponse.class);
+        LinkedHashMap data = (LinkedHashMap) generalResponse.getData();
+        jwt = (String) data.get("jwt");
     }
     @Test
     @Order(1)
