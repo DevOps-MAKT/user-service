@@ -169,7 +169,7 @@ public class UserController {
                 "http://localhost:8003/reservation-service/reservation/are-reservations-active/" + email,
                 "GET",
                 authorizationHeader);
-        if (!(boolean) response.getData()) {
+        if ((boolean) response.getData()) {
             return Response
                     .status(Response.Status.BAD_REQUEST)
                     .entity(new GeneralResponse<>(false, "There are active reservations"))

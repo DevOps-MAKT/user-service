@@ -352,7 +352,7 @@ public class UserControllerTests {
         LinkedHashMap data = (LinkedHashMap) generalResponse.getData();
         jwt = (String) data.get("jwt");
 
-        doReturn(new GeneralResponse(false, "200"))
+        doReturn(new GeneralResponse(true, "200"))
                 .when(microserviceCommunicator)
                 .processResponse("http://localhost:8003/reservation-service/reservation/are-reservations-active/gost@gmail.com",
                         "GET",
@@ -382,7 +382,7 @@ public class UserControllerTests {
         LinkedHashMap data = (LinkedHashMap) generalResponse.getData();
         jwt = (String) data.get("jwt");
 
-        doReturn(new GeneralResponse(true, "200"))
+        doReturn(new GeneralResponse(false, "200"))
                 .when(microserviceCommunicator)
                 .processResponse("http://localhost:8003/reservation-service/reservation/are-reservations-active/gost@gmail.com",
                         "GET",
