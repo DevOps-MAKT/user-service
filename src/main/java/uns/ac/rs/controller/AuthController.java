@@ -32,7 +32,7 @@ public class AuthController {
         Optional<User> user = authService.login(loginDTO);
         if (user.isEmpty()) {
             return Response.status(Response.Status.BAD_REQUEST)
-                    .entity(new GeneralResponse<>("", "Credentials aren't valid"))
+                    .entity(new GeneralResponse<>("", "Credentials aren't valid or the user has been deleted"))
                     .build();
         }
         else {

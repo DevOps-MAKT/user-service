@@ -29,7 +29,7 @@ public class AuthServiceTests {
 
         User mockUser = new User("some.email@gmail.com", "some-username", "$2a$12$0Z2p.u8SdUm71I7uzaEgDOnay5dDtbiV2S3QdXfKccBlzPO0JRkA.", "Someone", "Something", "guest", "Subotica", "Serbia");
 
-        when(userRepository.findByUsername("some-username")).thenReturn(mockUser);
+        when(userRepository.findByUsername("some-username")).thenReturn(Optional.of(mockUser));
 
         Optional<User> loggedInUser = authService.login(mockLoginDTO);
 
@@ -58,7 +58,7 @@ public class AuthServiceTests {
 
         User mockUser = new User("some.email@gmail.com", "some-username", "$2a$12$0Z2p.u8SdUm71I7uzaEgDOnay5dDtbiV2S3QdXfKccBlzPO0JRkA.", "Someone", "Something", "guest", "Subotica", "Serbia");
 
-        when(userRepository.findByUsername("some-username")).thenReturn(mockUser);
+        when(userRepository.findByUsername("some-username")).thenReturn(Optional.of(mockUser));
 
         Optional<User> loggedInUser = authService.login(mockLoginDTO);
 

@@ -60,7 +60,7 @@ public class AuthControllerTests {
         .then()
                 .statusCode(400)
                 .body("data", equalTo(""))
-                .body("message", equalTo("Credentials aren't valid"));
+                .body("message", equalTo("Credentials aren't valid or the user has been deleted"));
     }
 
     @Test

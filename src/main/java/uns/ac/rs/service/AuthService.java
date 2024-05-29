@@ -17,11 +17,11 @@ public class AuthService {
     private UserRepository userRepository;
 
     public Optional<User> login(LoginDTO loginDTO) {
-        User user = userRepository.findByUsername(loginDTO.getUsername());
-        if (user == null || !BcryptUtil.matches(loginDTO.getPassword(), user.getPassword())) {
+        Optional<User> user = userRepository.findByUsername(loginDTO.getUsername());
+        if (user.isEmpty() || !BcryptUtil.matches(loginDTO.getPassword(), user.get().getPassword())) {
             return Optional.empty();
         }
-        return Optional.of(user);
+        return user;
     }
 
     public String generateJwt(User user) {
