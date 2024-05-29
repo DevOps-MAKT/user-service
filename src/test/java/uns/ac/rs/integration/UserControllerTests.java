@@ -16,12 +16,14 @@ import uns.ac.rs.dto.AccommodationReviewDTO;
 import uns.ac.rs.dto.HostReviewDTO;
 import uns.ac.rs.dto.MinAccommodationDTO;
 import uns.ac.rs.dto.PasswordDTO;
+import uns.ac.rs.dto.response.JWTResponse;
 import uns.ac.rs.model.AccommodationReview;
 import uns.ac.rs.model.HostReview;
 
 import java.net.URL;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 import static io.restassured.RestAssured.given;
@@ -119,13 +121,15 @@ public class UserControllerTests {
 
     @BeforeEach
     public void login(){
-        Response response = RestAssured.given()
+        Response response = given()
                 .contentType("application/json")
                 .body("{\"username\": \"admin\", \"password\": \"admin123\"}")
                 .when().post(loginEndpoint)
                 .then().extract().response();
 
-        jwt = response.getBody().jsonPath().getString("data");
+        GeneralResponse generalResponse = response.as(GeneralResponse.class);
+        LinkedHashMap data = (LinkedHashMap) generalResponse.getData();
+        jwt = (String) data.get("jwt");
 
     }
 
@@ -250,7 +254,10 @@ public class UserControllerTests {
                 .when().post(loginEndpoint)
                 .then().extract().response();
 
-        jwt = response.getBody().jsonPath().getString("data");
+        GeneralResponse generalResponse = response.as(GeneralResponse.class);
+        LinkedHashMap data = (LinkedHashMap) generalResponse.getData();
+        jwt = (String) data.get("jwt");
+
         given()
                 .contentType(ContentType.JSON)
                 .header("Authorization", "Bearer " + jwt)
@@ -270,7 +277,10 @@ public class UserControllerTests {
                 .when().post(loginEndpoint)
                 .then().extract().response();
 
-        jwt = response.getBody().jsonPath().getString("data");
+        GeneralResponse generalResponse = response.as(GeneralResponse.class);
+        LinkedHashMap data = (LinkedHashMap) generalResponse.getData();
+        jwt = (String) data.get("jwt");
+
         given()
                 .contentType(ContentType.JSON)
                 .header("Authorization", "Bearer " + jwt)
@@ -290,7 +300,10 @@ public class UserControllerTests {
                 .when().post(loginEndpoint)
                 .then().extract().response();
 
-        jwt = response.getBody().jsonPath().getString("data");
+        GeneralResponse generalResponse = response.as(GeneralResponse.class);
+        LinkedHashMap data = (LinkedHashMap) generalResponse.getData();
+        jwt = (String) data.get("jwt");
+
         given()
                 .contentType(ContentType.JSON)
                 .header("Authorization", "Bearer " + jwt)
@@ -311,7 +324,10 @@ public class UserControllerTests {
                 .when().post(loginEndpoint)
                 .then().extract().response();
 
-        jwt = response.getBody().jsonPath().getString("data");
+        GeneralResponse generalResponse = response.as(GeneralResponse.class);
+        LinkedHashMap data = (LinkedHashMap) generalResponse.getData();
+        jwt = (String) data.get("jwt");
+
         given()
                 .contentType(ContentType.JSON)
                 .header("Authorization", "Bearer " + jwt)
@@ -332,7 +348,9 @@ public class UserControllerTests {
                 .when().post(loginEndpoint)
                 .then().extract().response();
 
-        jwt = response.getBody().jsonPath().getString("data");
+        GeneralResponse generalResponse = response.as(GeneralResponse.class);
+        LinkedHashMap data = (LinkedHashMap) generalResponse.getData();
+        jwt = (String) data.get("jwt");
 
         doReturn(new GeneralResponse(false, "200"))
                 .when(microserviceCommunicator)
@@ -360,7 +378,9 @@ public class UserControllerTests {
                 .when().post(loginEndpoint)
                 .then().extract().response();
 
-        jwt = response.getBody().jsonPath().getString("data");
+        GeneralResponse generalResponse = response.as(GeneralResponse.class);
+        LinkedHashMap data = (LinkedHashMap) generalResponse.getData();
+        jwt = (String) data.get("jwt");
 
         doReturn(new GeneralResponse(true, "200"))
                 .when(microserviceCommunicator)
@@ -388,7 +408,9 @@ public class UserControllerTests {
                 .when().post(loginEndpoint)
                 .then().extract().response();
 
-        jwt = response.getBody().jsonPath().getString("data");
+        GeneralResponse generalResponse = response.as(GeneralResponse.class);
+        LinkedHashMap data = (LinkedHashMap) generalResponse.getData();
+        jwt = (String) data.get("jwt");
 
         doReturn(new GeneralResponse(true, "200"))
                 .when(microserviceCommunicator)
@@ -416,7 +438,9 @@ public class UserControllerTests {
                 .when().post(loginEndpoint)
                 .then().extract().response();
 
-        jwt = response.getBody().jsonPath().getString("data");
+        GeneralResponse generalResponse = response.as(GeneralResponse.class);
+        LinkedHashMap data = (LinkedHashMap) generalResponse.getData();
+        jwt = (String) data.get("jwt");
 
         doReturn(new GeneralResponse(false, "200"))
                 .when(microserviceCommunicator)
@@ -450,7 +474,9 @@ public class UserControllerTests {
                 .when().post(loginEndpoint)
                 .then().extract().response();
 
-        jwt = response.getBody().jsonPath().getString("data");
+        GeneralResponse generalResponse = response.as(GeneralResponse.class);
+        LinkedHashMap data = (LinkedHashMap) generalResponse.getData();
+        jwt = (String) data.get("jwt");
 
         List<String> hostEmails = new ArrayList<>();
         hostEmails.add("pera@gmail.com");
@@ -480,7 +506,9 @@ public class UserControllerTests {
                 .when().post(loginEndpoint)
                 .then().extract().response();
 
-        jwt = response.getBody().jsonPath().getString("data");
+        GeneralResponse generalResponse = response.as(GeneralResponse.class);
+        LinkedHashMap data = (LinkedHashMap) generalResponse.getData();
+        jwt = (String) data.get("jwt");
 
         HostReview hostReview = new HostReview();
         hostReview.setHostEmail("pera@gmail.com");
@@ -513,7 +541,9 @@ public class UserControllerTests {
                 .when().post(loginEndpoint)
                 .then().extract().response();
 
-        jwt = response.getBody().jsonPath().getString("data");
+        GeneralResponse generalResponse = response.as(GeneralResponse.class);
+        LinkedHashMap data = (LinkedHashMap) generalResponse.getData();
+        jwt = (String) data.get("jwt");
 
         HostReview hostReview = new HostReview();
         hostReview.setHostEmail("pera@gmail.com");
@@ -546,7 +576,9 @@ public class UserControllerTests {
                 .when().post(loginEndpoint)
                 .then().extract().response();
 
-        jwt = response.getBody().jsonPath().getString("data");
+        GeneralResponse generalResponse = response.as(GeneralResponse.class);
+        LinkedHashMap data = (LinkedHashMap) generalResponse.getData();
+        jwt = (String) data.get("jwt");
 
         given()
                 .contentType(ContentType.JSON)
@@ -569,7 +601,9 @@ public class UserControllerTests {
                 .when().post(loginEndpoint)
                 .then().extract().response();
 
-        jwt = response.getBody().jsonPath().getString("data");
+        GeneralResponse generalResponse = response.as(GeneralResponse.class);
+        LinkedHashMap data = (LinkedHashMap) generalResponse.getData();
+        jwt = (String) data.get("jwt");
 
         given()
                 .contentType(ContentType.JSON)
@@ -591,7 +625,9 @@ public class UserControllerTests {
                 .when().post(loginEndpoint)
                 .then().extract().response();
 
-        jwt = response.getBody().jsonPath().getString("data");
+        GeneralResponse generalResponse = response.as(GeneralResponse.class);
+        LinkedHashMap data = (LinkedHashMap) generalResponse.getData();
+        jwt = (String) data.get("jwt");
 
         List<Long> accommodationIds = new ArrayList<>();
         accommodationIds.add(1L);
@@ -631,7 +667,9 @@ public class UserControllerTests {
                 .when().post(loginEndpoint)
                 .then().extract().response();
 
-        jwt = response.getBody().jsonPath().getString("data");
+        GeneralResponse generalResponse = response.as(GeneralResponse.class);
+        LinkedHashMap data = (LinkedHashMap) generalResponse.getData();
+        jwt = (String) data.get("jwt");
 
         AccommodationReview accommodationReview = new AccommodationReview();
         accommodationReview.setAccommodationName("some-accommodation");
@@ -664,7 +702,9 @@ public class UserControllerTests {
                 .when().post(loginEndpoint)
                 .then().extract().response();
 
-        jwt = response.getBody().jsonPath().getString("data");
+        GeneralResponse generalResponse = response.as(GeneralResponse.class);
+        LinkedHashMap data = (LinkedHashMap) generalResponse.getData();
+        jwt = (String) data.get("jwt");
 
         AccommodationReview accommodationReview = new AccommodationReview();
         accommodationReview.setAccommodationName("some-accommodation");
@@ -697,7 +737,9 @@ public class UserControllerTests {
                 .when().post(loginEndpoint)
                 .then().extract().response();
 
-        jwt = response.getBody().jsonPath().getString("data");
+        GeneralResponse generalResponse = response.as(GeneralResponse.class);
+        LinkedHashMap data = (LinkedHashMap) generalResponse.getData();
+        jwt = (String) data.get("jwt");
 
         given()
                 .contentType(ContentType.JSON)
@@ -720,7 +762,9 @@ public class UserControllerTests {
                 .when().post(loginEndpoint)
                 .then().extract().response();
 
-        jwt = response.getBody().jsonPath().getString("data");
+        GeneralResponse generalResponse = response.as(GeneralResponse.class);
+        LinkedHashMap data = (LinkedHashMap) generalResponse.getData();
+        jwt = (String) data.get("jwt");
 
         given()
                 .contentType(ContentType.JSON)
@@ -742,7 +786,9 @@ public class UserControllerTests {
                 .when().post(loginEndpoint)
                 .then().extract().response();
 
-        jwt = response.getBody().jsonPath().getString("data");
+        GeneralResponse generalResponse = response.as(GeneralResponse.class);
+        LinkedHashMap data = (LinkedHashMap) generalResponse.getData();
+        jwt = (String) data.get("jwt");
 
         given()
                 .contentType(ContentType.JSON)

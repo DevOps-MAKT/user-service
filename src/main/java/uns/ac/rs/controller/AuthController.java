@@ -10,6 +10,7 @@ import jakarta.ws.rs.core.SecurityContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import uns.ac.rs.GeneralResponse;
 import uns.ac.rs.dto.LoginDTO;
+import uns.ac.rs.dto.response.JWTResponse;
 import uns.ac.rs.model.User;
 import uns.ac.rs.service.AuthService;
 
@@ -36,7 +37,7 @@ public class AuthController {
         }
         else {
             String jwt = authService.generateJwt(user.get());
-            return Response.ok(new GeneralResponse<>(jwt, "Successfully logged in"))
+            return Response.ok(new GeneralResponse<>(new JWTResponse(jwt, user.get().getRole()), "Successfully logged in"))
                     .build();
         }
     }
