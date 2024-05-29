@@ -137,7 +137,7 @@ public class UserController {
                 .build();
     }
 
-    @PATCH
+    @GET
     @Path("/append-cancellation")
     @RolesAllowed("guest")
     public Response appendCancellation(@Context SecurityContext ctx) {
@@ -200,7 +200,7 @@ public class UserController {
         userService.deactivateUser(email);
         GeneralResponse successfulAccommodationDeletion = microserviceCommunicator.processResponse(
                 "http://localhost:8002/accommodation-service/accommodation/deactivate-hosts-accommodations/" + email,
-                "PATCH",
+                "DELETE",
                 authorizationHeader);
         if (!(boolean) successfulAccommodationDeletion.getData())  {
             return Response

@@ -307,7 +307,7 @@ public class UserControllerTests {
                 .contentType(ContentType.JSON)
                 .header("Authorization", "Bearer " + jwt)
         .when()
-                .patch(appendCancellationEndpoint)
+                .get(appendCancellationEndpoint)
         .then()
                 .statusCode(200)
                 .body("data", equalTo(1))
@@ -806,15 +806,15 @@ public class UserControllerTests {
         doReturn(new GeneralResponse(true, "200"))
                 .when(microserviceCommunicator)
                 .processResponse("http://localhost:8002/accommodation-service/accommodation/deactivate-hosts-accommodations/pera@gmail.com",
-                        "PATCH",
+                        "DELETE",
                         "Bearer " + jwt);
 
         given()
                 .contentType(ContentType.JSON)
                 .header("Authorization", "Bearer " + jwt)
-                .when()
+        .when()
                 .patch(terminateHostEndpoint)
-                .then()
+        .then()
                 .statusCode(200)
                 .body("data", equalTo(true))
                 .body("message", equalTo("Successfully terminated account"));
