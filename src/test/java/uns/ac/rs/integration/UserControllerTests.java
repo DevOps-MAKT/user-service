@@ -8,8 +8,10 @@ import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import uns.ac.rs.GeneralResponse;
 import uns.ac.rs.MicroserviceCommunicator;
+import uns.ac.rs.config.IntegrationConfig;
 import uns.ac.rs.controller.AuthController;
 import uns.ac.rs.controller.UserController;
 import uns.ac.rs.dto.AccommodationReviewDTO;
@@ -37,6 +39,9 @@ public class UserControllerTests {
 
     @InjectMock
     private MicroserviceCommunicator microserviceCommunicator;
+
+    @Autowired
+    private IntegrationConfig config;
 
     @TestHTTPEndpoint(AuthController.class)
     @TestHTTPResource("login")
@@ -353,7 +358,7 @@ public class UserControllerTests {
 
         doReturn(new GeneralResponse(true, "200"))
                 .when(microserviceCommunicator)
-                .processResponse("http://localhost:8003/reservation-service/reservation/are-reservations-active/gost@gmail.com",
+                .processResponse(config.reservationServiceAPI() + "/reservation/are-reservations-active/gost@gmail.com",
                         "GET",
                         "Bearer " + jwt);
 
@@ -383,7 +388,7 @@ public class UserControllerTests {
 
         doReturn(new GeneralResponse(true, "200"))
                 .when(microserviceCommunicator)
-                .processResponse("http://localhost:8003/reservation-service/reservation/do-active-reservations-exist/pera@gmail.com",
+                .processResponse(config.reservationServiceAPI() + "/reservation/do-active-reservations-exist/pera@gmail.com",
                         "GET",
                         "Bearer " + jwt);
 
@@ -415,7 +420,7 @@ public class UserControllerTests {
         hostEmails.add("pera@gmail.com");
         doReturn(new GeneralResponse(hostEmails, "200"))
                 .when(microserviceCommunicator)
-                .processResponse("http://localhost:8003/reservation-service/retrieve-reservation-hosts/gost@gmail.com",
+                .processResponse(config.reservationServiceAPI() + "/retrieve-reservation-hosts/gost@gmail.com",
                         "GET",
                         "");
 
@@ -570,13 +575,13 @@ public class UserControllerTests {
 
         doReturn(new GeneralResponse(accommodationIds, "200"))
                 .when(microserviceCommunicator)
-                .processResponse("http://localhost:8003/reservation-service/retrieve-reservation-accommodations/gost@gmail.com",
+                .processResponse(config.reservationServiceAPI() + "/retrieve-reservation-accommodations/gost@gmail.com",
                         "GET",
                         "");
 
         doReturn(new GeneralResponse(minAccommodationDTOS, "200"))
                 .when(microserviceCommunicator)
-                .processResponse("http://localhost:8002/accommodation-service/retrieve-min-accommodations",
+                .processResponse(config.accommodationServiceAPI() + "/retrieve-min-accommodations",
                         "GET",
                         "");
 
@@ -769,7 +774,7 @@ public class UserControllerTests {
 
         doReturn(new GeneralResponse(false, "200"))
                 .when(microserviceCommunicator)
-                .processResponse("http://localhost:8003/reservation-service/reservation/are-reservations-active/gost@gmail.com",
+                .processResponse(config.reservationServiceAPI() + "/reservation/are-reservations-active/gost@gmail.com",
                         "GET",
                         "Bearer " + jwt);
 
@@ -799,13 +804,13 @@ public class UserControllerTests {
 
         doReturn(new GeneralResponse(false, "200"))
                 .when(microserviceCommunicator)
-                .processResponse("http://localhost:8003/reservation-service/reservation/do-active-reservations-exist/pera@gmail.com",
+                .processResponse(config.reservationServiceAPI() + "/reservation/do-active-reservations-exist/pera@gmail.com",
                         "GET",
                         "Bearer " + jwt);
 
         doReturn(new GeneralResponse(true, "200"))
                 .when(microserviceCommunicator)
-                .processResponse("http://localhost:8002/accommodation-service/accommodation/deactivate-hosts-accommodations/pera@gmail.com",
+                .processResponse(config.accommodationServiceAPI() + "/accommodation/deactivate-hosts-accommodations/pera@gmail.com",
                         "DELETE",
                         "Bearer " + jwt);
 

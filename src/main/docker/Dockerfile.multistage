@@ -15,7 +15,7 @@ FROM quay.io/quarkus/quarkus-micro-image:2.0
 WORKDIR /work/
 COPY --from=build /code/target/*-runner /work/application
 COPY --from=build /code/target/classes/import.sql /work/import.sql
-
+COPY --from=build /code/target/classes/jwt /work/jwt
 
 EXPOSE 8001
 

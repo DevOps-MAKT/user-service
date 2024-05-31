@@ -1,8 +1,10 @@
 package uns.ac.rs.dto.request;
 
+import io.quarkus.runtime.annotations.RegisterForReflection;
 import lombok.Data;
 
 @Data
+@RegisterForReflection
 public class UserRequestDTO {
     private String email;
     private String username;
