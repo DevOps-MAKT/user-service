@@ -1,8 +1,10 @@
 package uns.ac.rs.dto;
 
+import io.quarkus.runtime.annotations.RegisterForReflection;
 import lombok.Data;
 
 @Data
+@RegisterForReflection
 public class MinAccommodationDTO {
 
     private long id;

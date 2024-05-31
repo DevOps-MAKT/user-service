@@ -1,9 +1,11 @@
 package uns.ac.rs.dto;
 
+import io.quarkus.runtime.annotations.RegisterForReflection;
 import lombok.Data;
 import uns.ac.rs.model.AccommodationReview;
 
 @Data
+@RegisterForReflection
 public class AccommodationReviewDTO {
 
     private String accommodationName;

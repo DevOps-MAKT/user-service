@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import uns.ac.rs.GeneralResponse;
 import uns.ac.rs.MicroserviceCommunicator;
+import uns.ac.rs.config.IntegrationConfig;
 import uns.ac.rs.dto.*;
 import uns.ac.rs.dto.request.UserRequestDTO;
 import uns.ac.rs.dto.response.UserResponseDTO;
@@ -36,6 +37,9 @@ public class UserController {
 
     @Autowired
     private MicroserviceCommunicator microserviceCommunicator;
+
+    @Autowired
+    private IntegrationConfig config;
 
     @GET
     @RolesAllowed({"host", "admin", "guest"})
@@ -166,7 +170,7 @@ public class UserController {
     public Response terminateGuestAccount(@Context SecurityContext ctx, @HeaderParam("Authorization") String authorizationHeader) {
         String email = ctx.getUserPrincipal().getName();
         GeneralResponse response = microserviceCommunicator.processResponse(
-                "http://localhost:8003/reservation-service/reservation/are-reservations-active/" + email,
+                config.reservationServiceAPI() + "/reservation/are-reservations-active/" + email,
                 "GET",
                 authorizationHeader);
         if ((boolean) response.getData()) {
@@ -188,7 +192,7 @@ public class UserController {
     public Response terminateHostAccount(@Context SecurityContext ctx, @HeaderParam("Authorization") String authorizationHeader) {
         String email = ctx.getUserPrincipal().getName();
         GeneralResponse response = microserviceCommunicator.processResponse(
-                "http://localhost:8003/reservation-service/reservation/do-active-reservations-exist/" + email,
+                config.reservationServiceAPI() + "/reservation/do-active-reservations-exist/" + email,
                 "GET",
                 authorizationHeader);
         if ((boolean) response.getData()) {
@@ -199,7 +203,7 @@ public class UserController {
         }
         userService.deactivateUser(email);
         GeneralResponse successfulAccommodationDeletion = microserviceCommunicator.processResponse(
-                "http://localhost:8002/accommodation-service/accommodation/deactivate-hosts-accommodations/" + email,
+                config.accommodationServiceAPI() + "/accommodation/deactivate-hosts-accommodations/" + email,
                 "DELETE",
                 authorizationHeader);
         if (!(boolean) successfulAccommodationDeletion.getData())  {
@@ -220,7 +224,7 @@ public class UserController {
     public Response getHostReviews(@Context SecurityContext ctx) {
         String email = ctx.getUserPrincipal().getName();
         GeneralResponse response = microserviceCommunicator.processResponse(
-                "http://localhost:8003/reservation-service/retrieve-reservation-hosts/" + email,
+                config.reservationServiceAPI() + "/retrieve-reservation-hosts/" + email,
                 "GET",
                 "");
         List<String> hostEmails = (List<String>) response.getData();
@@ -237,13 +241,13 @@ public class UserController {
     public Response getAccommodationReviews(@Context SecurityContext ctx) {
         String email = ctx.getUserPrincipal().getName();
         GeneralResponse response = microserviceCommunicator.processResponse(
-                "http://localhost:8003/reservation-service/retrieve-reservation-accommodations/" + email,
+                config.reservationServiceAPI() + "/retrieve-reservation-accommodations/" + email,
                 "GET",
                 "");
         List<Long> accommodationIds = (List<Long>) response.getData();
 
         GeneralResponse minAccommodations = microserviceCommunicator.processResponse(
-                "http://localhost:8002/accommodation-service/retrieve-min-accommodations",
+                config.accommodationServiceAPI() + "/retrieve-min-accommodations",
                 "GET",
                 "");
         List<MinAccommodationDTO> minAccommodationDTOS = (List<MinAccommodationDTO>) minAccommodations.getData();

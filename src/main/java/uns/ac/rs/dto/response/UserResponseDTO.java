@@ -1,9 +1,11 @@
 package uns.ac.rs.dto.response;
 
+import io.quarkus.runtime.annotations.RegisterForReflection;
 import lombok.Data;
 import uns.ac.rs.model.User;
 
 @Data
+@RegisterForReflection
 public class UserResponseDTO {
     private String email;
     private String username;
