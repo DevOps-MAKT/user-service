@@ -56,7 +56,7 @@ public class AuthController {
      */
     public Response authorize(@Context SecurityContext ctx, @PathParam("role") String role) {
         if (ctx.getUserPrincipal() == null) {
-            logger.warn("Unauthorized access for role {}", role);
+            logger.warn("Unauthorized access for role");
             return Response.status(Response.Status.UNAUTHORIZED)
                     .entity(new GeneralResponse<>("", "Unauthorized access - no one is logged in"))
                     .build();
