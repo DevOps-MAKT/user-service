@@ -43,7 +43,7 @@ public class AuthServiceTests {
     public void testLogin_UserNotFound() {
         LoginDTO mockLoginDTO = new LoginDTO("nonexistent-username", "password123");
 
-        when(userRepository.findByUsername("nonexistent-username")).thenReturn(null);
+        when(userRepository.findByUsername("nonexistent-username")).thenReturn(Optional.empty());
 
         Optional<User> loggedInUser = authService.login(mockLoginDTO);
 
