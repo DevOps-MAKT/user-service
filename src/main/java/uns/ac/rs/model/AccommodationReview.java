@@ -15,8 +15,8 @@ public class AccommodationReview {
     @Column(name = "guest_email")
     private String guestEmail;
 
-    @Column(name = "accommodation_name")
-    private String accommodationName;
+    @Column(name = "accommodation_id")
+    private Long accommodationId;
 
     @Column(name = "timestamp")
     private Long timestamp;
@@ -31,9 +31,9 @@ public class AccommodationReview {
 
     }
 
-    public AccommodationReview(String guestEmail, String accommodationName, Long timestamp, Integer rating, boolean deleted) {
+    public AccommodationReview(String guestEmail, Long accommodationId, Long timestamp, Integer rating, boolean deleted) {
         this.guestEmail = guestEmail;
-        this.accommodationName = accommodationName;
+        this.accommodationId = accommodationId;
         this.timestamp = timestamp;
         this.rating = rating;
         this.deleted = deleted;
@@ -41,7 +41,7 @@ public class AccommodationReview {
 
     public AccommodationReview(AccommodationReviewDTO accommodationReviewDTO, String guestEmail) {
         this.guestEmail = guestEmail;
-        this.accommodationName = accommodationReviewDTO.getAccommodationName();
+        this.accommodationId = accommodationReviewDTO.getAccommodationId();
         this.timestamp = accommodationReviewDTO.getTimestamp();
         this.rating = accommodationReviewDTO.getRating();
         this.deleted = false;

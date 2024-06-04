@@ -342,12 +342,12 @@ public class UserController {
     }
 
     @DELETE
-    @Path("/delete-accommodation-review/{accommodation_name}")
+    @Path("/delete-accommodation-review/{accommodation_id}")
     @RolesAllowed("guest")
-    public Response deleteAccommodationReview(@Context SecurityContext ctx, @PathParam("accommodation_name") String accommodationName) {
+    public Response deleteAccommodationReview(@Context SecurityContext ctx, @PathParam("accommodation_id") Long accommodationId) {
         String email = ctx.getUserPrincipal().getName();
         logger.info("Deleting an accommodation review where the user with email " + email + " has had reservations");
-        AccommodationReview deletedReview = userService.deleteAccommodationReview(email, accommodationName);
+        AccommodationReview deletedReview = userService.deleteAccommodationReview(email, accommodationId);
         logger.info("Successfully deleted the accommodation review where the user with email " + email + " has had reservations");
         return Response
                 .ok()
@@ -370,12 +370,12 @@ public class UserController {
     }
 
     @GET
-    @Path("/accommodation-reviews-info/{accommodation_name}")
+    @Path("/accommodation-reviews-info/{accommodation_id}")
     @PermitAll
-    public Response getAccommodationReviewsInfo(@PathParam("accommodation_name") String accommodationName) {
-        logger.info("Retrieving reviews and average rating for accommodation with name " + accommodationName);
-        AccommodationReviewInfoDTO accommodationReviewInfoDTO = userService.getAccommodationReviewsInfo(accommodationName);
-        logger.info("Successsfully retrieved reviews and average rating for accommodation with name " + accommodationName);
+    public Response getAccommodationReviewsInfo(@PathParam("accommodation_id") Long accommodationId) {
+        logger.info("Retrieving reviews and average rating for accommodation with name " + accommodationId);
+        AccommodationReviewInfoDTO accommodationReviewInfoDTO = userService.getAccommodationReviewsInfo(accommodationId);
+        logger.info("Successsfully retrieved reviews and average rating for accommodation with name " + accommodationId);
         return Response
                 .ok()
                 .entity(new GeneralResponse<>(accommodationReviewInfoDTO, "Successfully retrieved accommodation reviews info"))
@@ -383,15 +383,15 @@ public class UserController {
     }
 
     @GET
-    @Path("/avg-rating/{accommodation_name}")
+    @Path("/avg-rating/{accommodation_id}")
     @PermitAll
-    public Response getAvgRating(@PathParam("accommodation_name") String accommodationName) {
-        logger.info("Retrieving average rating for accommodation with name " + accommodationName);
-        float avgRating = userService.getAvgRating(accommodationName);
-        logger.info("Successfully retrieved average rating for accommodation with name " + accommodationName);
+    public Response getAvgRating(@PathParam("accommodation_id") Long accommodationId) {
+        logger.info("Retrieving average rating for accommodation with name " + accommodationId);
+        float avgRating = userService.getAvgRating(accommodationId);
+        logger.info("Successfully retrieved average rating for accommodation with name " + accommodationId);
         return Response
                 .ok()
-                .entity(new GeneralResponse<>(avgRating, "Successfully retrieved accommodation rating"))
+                .entity(new GeneralResponse<, "Successfully retrieved accommodation rating"))
                 .build();
     }
 

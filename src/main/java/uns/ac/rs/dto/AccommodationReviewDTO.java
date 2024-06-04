@@ -8,20 +8,20 @@ import uns.ac.rs.model.AccommodationReview;
 @RegisterForReflection
 public class AccommodationReviewDTO {
 
-    private String accommodationName;
+    private Long accommodationId;
     private Long timestamp;
     private Integer rating;
     private boolean deleted;
 
     public AccommodationReviewDTO() {
-        this.accommodationName = null;
+        this.accommodationId = null;
         this.timestamp = null;
         this.rating = null;
         this.deleted = false;
     }
 
     public AccommodationReviewDTO(AccommodationReview accommodationReview) {
-        this.accommodationName = accommodationReview.getAccommodationName();
+        this.accommodationId = accommodationReview.getAccommodationId();
         this.timestamp = accommodationReview.getTimestamp();
         this.rating = accommodationReview.getRating();
         this.deleted = accommodationReview.isDeleted();

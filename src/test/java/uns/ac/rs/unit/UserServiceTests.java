@@ -1,6 +1,5 @@
 package uns.ac.rs.unit;
 
-import io.quarkus.elytron.security.common.BcryptUtil;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -228,19 +227,19 @@ public class UserServiceTests {
     @Test
     public void testGetAccommodationReviewsInfo() {
         // Mock data
-        String accommodationName = "Accommodation";
+        Long accommodationId = 1L;
         AccommodationReview accommodationReview1 = new AccommodationReview();
         accommodationReview1.setId(1L);
-        accommodationReview1.setAccommodationName(accommodationName);
+        accommodationReview1.setAccommodationId(accommodationId);
         accommodationReview1.setRating(5);
         AccommodationReview accommodationReview2 = new AccommodationReview();
         accommodationReview2.setId(2L);
-        accommodationReview2.setAccommodationName(accommodationName);
+        accommodationReview2.setAccommodationId(accommodationId);
         accommodationReview2.setRating(4);
-        when(accommodationReviewRepository.findByAccommodationName(accommodationName))
+        when(accommodationReviewRepository.findByAccommodationId(accommodationId))
                 .thenReturn(Optional.of(Arrays.asList(accommodationReview1, accommodationReview2)));
 
-        AccommodationReviewInfoDTO reviewInfoDTO = userService.getAccommodationReviewsInfo(accommodationName);
+        AccommodationReviewInfoDTO reviewInfoDTO = userService.getAccommodationReviewsInfo(accommodationId);
 
         assertNotNull(reviewInfoDTO);
         assertEquals(2, reviewInfoDTO.getReviews().size());
@@ -258,13 +257,13 @@ public class UserServiceTests {
 
         AccommodationReview accommodationReview1 = new AccommodationReview();
         accommodationReview1.setId(1L);
-        accommodationReview1.setAccommodationName("Accommodation 1");
+        accommodationReview1.setAccommodationId(1L);
         accommodationReview1.setRating(5);
         AccommodationReview accommodationReview2 = new AccommodationReview();
         accommodationReview2.setId(2L);
-        accommodationReview2.setAccommodationName("Accommodation 2");
+        accommodationReview2.setAccommodationId(2L);
         accommodationReview2.setRating(4);
-        when(accommodationReviewRepository.findByGuestEmailAndAccommodationName(eq(guestEmail), anyString()))
+        when(accommodationReviewRepository.findByGuestEmailAndAccommodationId(eq(guestEmail), anyLong()))
                 .thenReturn(Optional.of(accommodationReview1), Optional.of(accommodationReview2));
 
         List<AccommodationReviewDTO> reviewDTOs = userService.retrieveAccommodationReviews(guestEmail, accommodationIds, minAccommodations);
@@ -279,17 +278,17 @@ public class UserServiceTests {
     public void testAddAccommodationReview() {
         String guestEmail = "guest@example.com";
         AccommodationReviewDTO reviewDTO = new AccommodationReviewDTO();
-        reviewDTO.setAccommodationName("Accommodation");
+        reviewDTO.setAccommodationId(1L);
         reviewDTO.setRating(5);
         reviewDTO.setTimestamp(System.currentTimeMillis());
 
         AccommodationReview existingReview = new AccommodationReview();
         existingReview.setId(1L);
         existingReview.setGuestEmail(guestEmail);
-        existingReview.setAccommodationName("Accommodation");
+        existingReview.setAccommodationId(1L);
         existingReview.setRating(4);
         existingReview.setTimestamp(System.currentTimeMillis() - 1000);
-        when(accommodationReviewRepository.findByGuestEmailAndAccommodationName(guestEmail, reviewDTO.getAccommodationName()))
+        when(accommodationReviewRepository.findByGuestEmailAndAccommodationId(guestEmail, reviewDTO.getAccommodationId()))
                 .thenReturn(Optional.of(existingReview));
 
         AccommodationReview addedReview = userService.addAccommodationReview(guestEmail, reviewDTO);
@@ -303,33 +302,33 @@ public class UserServiceTests {
     public void testAddNewAccommodationReview() {
         String guestEmail = "guest@example.com";
         AccommodationReviewDTO reviewDTO = new AccommodationReviewDTO();
-        reviewDTO.setAccommodationName("New Accommodation");
+        reviewDTO.setAccommodationId(1L);
         reviewDTO.setRating(5);
         reviewDTO.setTimestamp(System.currentTimeMillis());
 
-        when(accommodationReviewRepository.findByGuestEmailAndAccommodationName(guestEmail, reviewDTO.getAccommodationName()))
+        when(accommodationReviewRepository.findByGuestEmailAndAccommodationId(guestEmail, reviewDTO.getAccommodationId()))
                 .thenReturn(Optional.empty());
 
         AccommodationReview addedReview = userService.addAccommodationReview(guestEmail, reviewDTO);
 
         assertNotNull(addedReview);
         assertEquals(guestEmail, addedReview.getGuestEmail());
-        assertEquals("New Accommodation", addedReview.getAccommodationName());
+        assertEquals(1L, addedReview.getAccommodationId());
         assertEquals(5, addedReview.getRating());
     }
     @Test
     public void testDeleteAccommodationReview() {
         String guestEmail = "guest@example.com";
-        String accommodationName = "Accommodation";
+        Long accommodationId = 1L;
         AccommodationReview existingReview = new AccommodationReview();
         existingReview.setId(1L);
         existingReview.setGuestEmail(guestEmail);
-        existingReview.setAccommodationName(accommodationName);
+        existingReview.setAccommodationId(accommodationId);
         existingReview.setDeleted(false);
-        when(accommodationReviewRepository.findByGuestEmailAndAccommodationName(guestEmail, accommodationName))
+        when(accommodationReviewRepository.findByGuestEmailAndAccommodationId(guestEmail, accommodationId))
                 .thenReturn(Optional.of(existingReview));
 
-        AccommodationReview deletedReview = userService.deleteAccommodationReview(guestEmail, accommodationName);
+        AccommodationReview deletedReview = userService.deleteAccommodationReview(guestEmail, accommodationId);
 
         assertNotNull(deletedReview);
         assertTrue(deletedReview.isDeleted());
@@ -340,14 +339,14 @@ public class UserServiceTests {
 
         // Create test data
         List<AccommodationReview> reviews = new ArrayList<>();
-        reviews.add(new AccommodationReview("email1", "Accommodation1", 123456L, 4, false));
-        reviews.add(new AccommodationReview("email2", "Accommodation1", 123457L, 5, false));
-        reviews.add(new AccommodationReview("email3", "Accommodation1", 123458L, 3, false));
+        reviews.add(new AccommodationReview("email1", 1L, 123456L, 4, false));
+        reviews.add(new AccommodationReview("email2", 1L, 123457L, 5, false));
+        reviews.add(new AccommodationReview("email3", 1L, 123458L, 3, false));
 
-        when(accommodationReviewRepository.findByAccommodationName("Accommodation1"))
+        when(accommodationReviewRepository.findByAccommodationId(1L))
                 .thenReturn(Optional.of(reviews));
 
-        float avgRating = userService.getAvgRating("Accommodation1");
+        float avgRating = userService.getAvgRating(1L);
 
         assertEquals(4.0f, avgRating, 0.01);
     }

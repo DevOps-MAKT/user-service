@@ -108,15 +108,15 @@ public class UserControllerTests {
     URL addAccommodationReviewEndpoint;
 
     @TestHTTPEndpoint(UserController.class)
-    @TestHTTPResource("delete-accommodation-review/some-accommodation")
+    @TestHTTPResource("delete-accommodation-review/1")
     URL deleteAccommodationReviewEndpoint;
 
     @TestHTTPEndpoint(UserController.class)
-    @TestHTTPResource("accommodation-reviews-info/some-accommodation")
+    @TestHTTPResource("accommodation-reviews-info/1")
     URL accommodationReviewsInfoEndpoint;
 
     @TestHTTPEndpoint(UserController.class)
-    @TestHTTPResource("avg-rating/some-accommodation")
+    @TestHTTPResource("avg-rating/1")
     URL getAvgRatingEndpoint;
 
     @TestHTTPEndpoint(UserController.class)
@@ -610,7 +610,7 @@ public class UserControllerTests {
         jwt = (String) data.get("jwt");
 
         AccommodationReview accommodationReview = new AccommodationReview();
-        accommodationReview.setAccommodationName("some-accommodation");
+        accommodationReview.setAccommodationId(1L);
         accommodationReview.setGuestEmail("gost@gmail.com");
         accommodationReview.setRating(3);
         long now = Instant.now().toEpochMilli();
@@ -625,7 +625,7 @@ public class UserControllerTests {
                 .put(addAccommodationReviewEndpoint)
         .then()
                 .statusCode(200)
-                .body("data.accommodationName", equalTo("some-accommodation"))
+                .body("data.accommodationId", equalTo(1))
                 .body("data.timestamp", equalTo(now))
                 .body("data.rating", equalTo(3))
                 .body("message", equalTo("Successfully added/updated accommodation review"));
@@ -645,7 +645,7 @@ public class UserControllerTests {
         jwt = (String) data.get("jwt");
 
         AccommodationReview accommodationReview = new AccommodationReview();
-        accommodationReview.setAccommodationName("some-accommodation");
+        accommodationReview.setAccommodationId(1L);
         accommodationReview.setGuestEmail("gost@gmail.com");
         accommodationReview.setRating(5);
         long now = Instant.now().toEpochMilli();
@@ -660,7 +660,7 @@ public class UserControllerTests {
                 .put(addAccommodationReviewEndpoint)
         .then()
                 .statusCode(200)
-                .body("data.accommodationName", equalTo("some-accommodation"))
+                .body("data.accommodationId", equalTo(1))
                 .body("data.timestamp", equalTo(now))
                 .body("data.rating", equalTo(5))
                 .body("message", equalTo("Successfully added/updated accommodation review"));
