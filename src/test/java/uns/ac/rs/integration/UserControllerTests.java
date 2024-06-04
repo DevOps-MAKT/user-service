@@ -14,10 +14,7 @@ import uns.ac.rs.MicroserviceCommunicator;
 import uns.ac.rs.config.IntegrationConfig;
 import uns.ac.rs.controller.AuthController;
 import uns.ac.rs.controller.UserController;
-import uns.ac.rs.dto.AccommodationReviewDTO;
-import uns.ac.rs.dto.HostReviewDTO;
-import uns.ac.rs.dto.MinAccommodationDTO;
-import uns.ac.rs.dto.PasswordDTO;
+import uns.ac.rs.dto.*;
 import uns.ac.rs.model.AccommodationReview;
 import uns.ac.rs.model.HostReview;
 
@@ -122,6 +119,14 @@ public class UserControllerTests {
     @TestHTTPEndpoint(UserController.class)
     @TestHTTPResource("update-password")
     URL updatePasswordEndpoint;
+
+    @TestHTTPEndpoint(UserController.class)
+    @TestHTTPResource("retrieve-active-notification-types")
+    URL retrieveActiveNotificationTypesEndpoint;
+
+    @TestHTTPEndpoint(UserController.class)
+    @TestHTTPResource("active-notification-statuses")
+    URL updateActiveNotificationStatusesEndpoint;
 
     @BeforeEach
     public void login(){
@@ -758,9 +763,72 @@ public class UserControllerTests {
                 .body("message", equalTo("Password successfully changed"));
     }
 
-
     @Test
     @Order(24)
+    public void whenRetrieveActiveNotificationTypes_thenReturnCurrentStatuses() {
+        Response response = RestAssured.given()
+                .contentType("application/json")
+                .body("{\"username\": \"gost\", \"password\": \"pera123\"}")
+                .when().post(loginEndpoint)
+                .then().extract().response();
+
+        GeneralResponse generalResponse = response.as(GeneralResponse.class);
+        LinkedHashMap data = (LinkedHashMap) generalResponse.getData();
+        jwt = (String) data.get("jwt");
+
+        given()
+                .contentType(ContentType.JSON)
+                .header("Authorization", "Bearer " + jwt)
+        .when()
+                .get(retrieveActiveNotificationTypesEndpoint)
+        .then()
+                .statusCode(200)
+                .body("data.reservationRequestedNotificationsActive", equalTo(false))
+                .body("data.reservationCancelledNotificationsActive", equalTo(false))
+                .body("data.hostRatedNotificationsActive", equalTo(false))
+                .body("data.accommodationRatedNotificationsActive", equalTo(false))
+                .body("data.reservationRequestAnsweredActive", equalTo(false))
+                .body("message", equalTo("Successfully retrieved users notification statuses"));
+    }
+
+    @Test
+    @Order(25)
+    public void whenUpdateNotificationStatuses_thenReturnUserWithUpdatedNotificationStatuses() {
+        Response response = RestAssured.given()
+                .contentType("application/json")
+                .body("{\"username\": \"gost\", \"password\": \"pera123\"}")
+                .when().post(loginEndpoint)
+                .then().extract().response();
+
+        GeneralResponse generalResponse = response.as(GeneralResponse.class);
+        LinkedHashMap data = (LinkedHashMap) generalResponse.getData();
+        jwt = (String) data.get("jwt");
+
+        NotificationStatusesDTO notificationStatusesDTO = new NotificationStatusesDTO();
+        notificationStatusesDTO.setHostRatedNotificationsActive(true);
+        notificationStatusesDTO.setReservationCancelledNotificationsActive(true);
+        notificationStatusesDTO.setAccommodationRatedNotificationsActive(true);
+        notificationStatusesDTO.setReservationRequestedNotificationsActive(true);
+        notificationStatusesDTO.setReservationRequestAnsweredActive(true);
+
+        given()
+                .contentType(ContentType.JSON)
+                .header("Authorization", "Bearer " + jwt)
+                .body(notificationStatusesDTO)
+        .when()
+                .patch(updateActiveNotificationStatusesEndpoint)
+        .then()
+                .statusCode(200)
+                .body("data.reservationRequestedNotificationsActive", equalTo(true))
+                .body("data.reservationCancelledNotificationsActive", equalTo(true))
+                .body("data.hostRatedNotificationsActive", equalTo(true))
+                .body("data.accommodationRatedNotificationsActive", equalTo(true))
+                .body("data.reservationRequestAnsweredActive", equalTo(true))
+                .body("message", equalTo("Successfully updated active notification statuses"));
+    }
+
+    @Test
+    @Order(26)
     public void whenTerminateGuestWithoutReservations_thenCanTerminate() {
         Response response = RestAssured.given()
                 .contentType("application/json")
@@ -790,7 +858,7 @@ public class UserControllerTests {
     }
 
     @Test
-    @Order(25)
+    @Order(27)
     public void whenTerminateHostWithNoActiveReservations_thenCanTerminate() {
         Response response = RestAssured.given()
                 .contentType("application/json")
@@ -821,7 +889,7 @@ public class UserControllerTests {
                 .patch(terminateHostEndpoint)
         .then()
                 .statusCode(200)
-                .body("data", equalTo(true))
+                .body("data", equalTo(false))
                 .body("message", equalTo("Successfully terminated account"));
     }
 }

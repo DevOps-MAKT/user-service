@@ -37,4 +37,8 @@ public class AuthService {
         return userRepository.findByEmailAndRole(email, role);
     }
 
+    public User validateUser(String email) {
+        return userRepository.findByEmail(email);
+    }
+
 }

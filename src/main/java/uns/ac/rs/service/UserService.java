@@ -221,6 +221,26 @@ public class UserService {
         accommodationReviewRepository.persist(extractedAccommodationReview);
         return extractedAccommodationReview;
     }
+
+    public NotificationStatusesDTO retrieveNotificationStatuses(String email) {
+        User user = userRepository.findByEmail(email);
+        return new NotificationStatusesDTO(user.isReservationRequestedNotificationsActive(),
+                user.isReservationCancelledNotificationsActive(),
+                user.isHostRatedNotificationsActive(),
+                user.isAccommodationRatedNotificationsActive(),
+                user.isReservationRequestAnsweredActive());
+    }
+
+    public User updateActiveNotificationStatuses(String email, NotificationStatusesDTO notificationStatusesDTO) {
+        User user = userRepository.findByEmail(email);
+        user.setAccommodationRatedNotificationsActive(notificationStatusesDTO.isAccommodationRatedNotificationsActive());
+        user.setHostRatedNotificationsActive(notificationStatusesDTO.isHostRatedNotificationsActive());
+        user.setReservationCancelledNotificationsActive(notificationStatusesDTO.isReservationCancelledNotificationsActive());
+        user.setReservationRequestedNotificationsActive(notificationStatusesDTO.isReservationRequestedNotificationsActive());
+        user.setReservationRequestAnsweredActive(notificationStatusesDTO.isReservationRequestAnsweredActive());
+        userRepository.persist(user);
+        return user;
+    }
     private void setUserAttributes(User user, UserRequestDTO userRequestDTO) {
         user.setFirstName(userRequestDTO.getFirstName());
         user.setLastName(userRequestDTO.getLastName());

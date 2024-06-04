@@ -2,6 +2,7 @@ package uns.ac.rs.controller;
 
 import jakarta.annotation.security.PermitAll;
 import jakarta.enterprise.context.RequestScoped;
+import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
@@ -11,11 +12,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import uns.ac.rs.GeneralResponse;
+import uns.ac.rs.MicroserviceCommunicator;
+import uns.ac.rs.config.IntegrationConfig;
 import uns.ac.rs.dto.LoginDTO;
 import uns.ac.rs.dto.response.JWTResponse;
 import uns.ac.rs.model.User;
 import uns.ac.rs.service.AuthService;
 
+import java.util.Objects;
 import java.util.Optional;
 
 @Path("/auth")
@@ -26,6 +30,10 @@ public class AuthController {
     private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
     @Autowired
     private AuthService authService;
+    @Autowired
+    private MicroserviceCommunicator microserviceCommunicator;
+    @Inject
+    private IntegrationConfig config;
 
     @POST
     @Path("/login")
@@ -63,7 +71,13 @@ public class AuthController {
         }
         String email = ctx.getUserPrincipal().getName();
         try {
-            User user = authService.validateUserWithRole(email, role);
+            User user;
+            if (!Objects.equals(role, "everyone")) {
+                user = authService.validateUserWithRole(email, role);
+            }
+            else {
+                user = authService.validateUser(email);
+            }
             logger.info("Authorized access for user {}", email);
             return Response.ok(new GeneralResponse<>(user.getEmail(), "Authorization successful"))
                     .build();
