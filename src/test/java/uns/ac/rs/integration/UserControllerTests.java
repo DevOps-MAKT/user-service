@@ -889,7 +889,7 @@ public class UserControllerTests {
                 .patch(terminateHostEndpoint)
         .then()
                 .statusCode(200)
-                .body("data", equalTo(false))
+                .body("data", equalTo(true))
                 .body("message", equalTo("Successfully terminated account"));
     }
 }
