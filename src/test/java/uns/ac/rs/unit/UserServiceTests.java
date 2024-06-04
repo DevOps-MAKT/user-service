@@ -350,7 +350,52 @@ public class UserServiceTests {
 
         assertEquals(4.0f, avgRating, 0.01);
     }
+    @Test
+    public void testRetrieveNotificationStatuses() {
+        User user = new User();
+        user.setReservationRequestAnsweredActive(true);
+        user.setReservationCancelledNotificationsActive(true);
+        user.setReservationRequestedNotificationsActive(true);
+        user.setHostRatedNotificationsActive(false);
+        user.setAccommodationRatedNotificationsActive(false);
 
+        when(userRepository.findByEmail("email")).thenReturn(user);
+
+        NotificationStatusesDTO notificationStatusesDTO = userService.retrieveNotificationStatuses("email");
+
+        assertTrue(notificationStatusesDTO.isReservationRequestedNotificationsActive());
+        assertTrue(notificationStatusesDTO.isReservationCancelledNotificationsActive());
+        assertTrue(notificationStatusesDTO.isReservationRequestedNotificationsActive());
+        assertFalse(notificationStatusesDTO.isHostRatedNotificationsActive());
+        assertFalse(notificationStatusesDTO.isAccommodationRatedNotificationsActive());
+    }
+
+    @Test
+    public void testUpdateNotificationStatuses() {
+        User user = new User();
+        user.setReservationRequestAnsweredActive(true);
+        user.setReservationCancelledNotificationsActive(true);
+        user.setReservationRequestedNotificationsActive(true);
+        user.setHostRatedNotificationsActive(false);
+        user.setAccommodationRatedNotificationsActive(false);
+
+        NotificationStatusesDTO notificationStatusesDTO1 = new NotificationStatusesDTO();
+        notificationStatusesDTO1.setReservationCancelledNotificationsActive(false);
+        notificationStatusesDTO1.setHostRatedNotificationsActive(false);
+        notificationStatusesDTO1.setReservationRequestedNotificationsActive(false);
+        notificationStatusesDTO1.setAccommodationRatedNotificationsActive(false);
+        notificationStatusesDTO1.setReservationRequestAnsweredActive(false);
+
+        when(userRepository.findByEmail("email")).thenReturn(user);
+
+        User updatedUser = userService.updateActiveNotificationStatuses("email", notificationStatusesDTO1);
+
+        assertFalse(updatedUser.isReservationRequestedNotificationsActive());
+        assertFalse(updatedUser.isReservationCancelledNotificationsActive());
+        assertFalse(updatedUser.isReservationRequestedNotificationsActive());
+        assertFalse(updatedUser.isHostRatedNotificationsActive());
+        assertFalse(updatedUser.isAccommodationRatedNotificationsActive());
+    }
 
 
 }

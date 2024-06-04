@@ -395,4 +395,43 @@ public class UserController {
                 .build();
     }
 
+    @GET
+    @Path("/retrieve-active-notification-types")
+    @PermitAll
+    public Response retrieveActiveNotifications(@Context SecurityContext ctx) {
+        try {
+            String email = ctx.getUserPrincipal().getName();
+            logger.info("Retrieving notification statuses for user with email " + email);
+            NotificationStatusesDTO notificationStatusesDTO = userService.retrieveNotificationStatuses(email);
+            logger.info("Successfully retrieved notification statuses for user with email " + email);
+            return Response
+                    .ok()
+                    .entity(new GeneralResponse<>(notificationStatusesDTO, "Successfully retrieved users notification statuses"))
+                    .build();
+        } catch (Exception e) {
+            logger.error("Error retrieving users notification statuses: {}", e.getLocalizedMessage());
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("Error retrieving users notification statuses").build();
+        }
+    }
+
+    @PATCH
+    @Path("/active-notification-statuses")
+    @PermitAll
+    public Response updateActiveNotificationStatuses(@Context SecurityContext ctx, NotificationStatusesDTO notificationStatusesDTO) {
+        try {
+            String email = ctx.getUserPrincipal().getName();
+            logger.info("Updating active notification statuses for user with email " + email);
+            User user = userService.updateActiveNotificationStatuses(email, notificationStatusesDTO);
+            return Response
+                    .ok()
+                    .entity(new GeneralResponse<>(new UserResponseDTO(user), "Successfully updated active notification statuses"))
+                    .build();
+        } catch (Exception e) {
+            logger.error("Error updating active notification statuses: {}", e.getLocalizedMessage());
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("Error updating active notification statuses").build();
+        }
+    }
+
 }

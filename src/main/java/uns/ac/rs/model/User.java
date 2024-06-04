@@ -35,6 +35,11 @@ public class User  {
     private boolean automaticReservationAcceptance;
     private int noCancellations;
     private boolean active;
+    private boolean reservationRequestedNotificationsActive;
+    private boolean reservationCancelledNotificationsActive;
+    private boolean hostRatedNotificationsActive;
+    private boolean accommodationRatedNotificationsActive;
+    private boolean reservationRequestAnsweredActive;
 
     public User(UserRequestDTO userRequestDTO) {
         email = userRequestDTO.getEmail();
@@ -48,6 +53,11 @@ public class User  {
         automaticReservationAcceptance = false;
         noCancellations = 0;
         active = true;
+        reservationRequestedNotificationsActive = false;
+        reservationCancelledNotificationsActive = false;
+        hostRatedNotificationsActive = false;
+        accommodationRatedNotificationsActive = false;
+        reservationRequestAnsweredActive = false;
     }
 
     public User() {

@@ -14,6 +14,11 @@ public class UserResponseDTO {
     private String city;
     private String country;
     private boolean automaticReservationAcceptance;
+    private boolean reservationRequestedNotificationsActive;
+    private boolean reservationCancelledNotificationsActive;
+    private boolean hostRatedNotificationsActive;
+    private boolean accommodationRatedNotificationsActive;
+    private boolean reservationRequestAnsweredActive;
 
     public UserResponseDTO(User user) {
         email = user.getEmail();
@@ -23,5 +28,10 @@ public class UserResponseDTO {
         city = user.getCity();
         country = user.getCountry();
         automaticReservationAcceptance = user.isAutomaticReservationAcceptance();
+        reservationRequestedNotificationsActive = user.isReservationRequestedNotificationsActive();
+        reservationCancelledNotificationsActive = user.isReservationCancelledNotificationsActive();
+        hostRatedNotificationsActive = user.isHostRatedNotificationsActive();
+        accommodationRatedNotificationsActive = user.isAccommodationRatedNotificationsActive();
+        reservationRequestAnsweredActive = user.isReservationRequestAnsweredActive();
     }
 }

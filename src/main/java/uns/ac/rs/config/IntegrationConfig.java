@@ -7,4 +7,5 @@ public interface IntegrationConfig {
 
     String accommodationServiceAPI();
     String reservationServiceAPI();
+    String notificationServiceAPI();
 }
