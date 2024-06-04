@@ -391,7 +391,7 @@ public class UserController {
         logger.info("Successfully retrieved average rating for accommodation with name " + accommodationId);
         return Response
                 .ok()
-                .entity(new GeneralResponse<, "Successfully retrieved accommodation rating"))
+                .entity(new GeneralResponse<>(avgRating, "Successfully retrieved accommodation rating"))
                 .build();
     }
 
