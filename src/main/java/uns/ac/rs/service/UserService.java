@@ -147,9 +147,9 @@ public class UserService {
         return hostReviewInfoDTO;
     }
 
-    public AccommodationReviewInfoDTO getAccommodationReviewsInfo(String accommodationName) {
+    public AccommodationReviewInfoDTO getAccommodationReviewsInfo(Long accommodationId) {
         Optional<List<AccommodationReview>> accommodationReviews = accommodationReviewRepository
-                .findByAccommodationName(accommodationName);
+                .findByAccommodationId(accommodationId);
         AccommodationReviewInfoDTO accommodationReviewInfoDTO = new AccommodationReviewInfoDTO();
         float avgRating = 0;
         List<AccommodationReviewDTO> accommodationReviewDTOS = new ArrayList<>();
@@ -167,10 +167,10 @@ public class UserService {
         return accommodationReviewInfoDTO;
     }
 
-    public float getAvgRating(String accommodationName) {
+    public float getAvgRating(Long accommodationId) {
         float avgRating = 0;
         Optional<List<AccommodationReview>> accommodationReviews = accommodationReviewRepository
-                .findByAccommodationName(accommodationName);
+                .findByAccommodationId(accommodationId);
         if (accommodationReviews.isPresent() && accommodationReviews.get().size() > 0) {
             for (AccommodationReview accommodationReview: accommodationReviews.get()) {
                 avgRating += accommodationReview.getRating();
@@ -183,11 +183,10 @@ public class UserService {
                                                                      List<Long> accommodationIds,
                                                                      List<MinAccommodationDTO> minAccommodations) {
         List<AccommodationReviewDTO> accommodationReviews = new ArrayList<>();
-        List<String> accommodationNames = extractNames(accommodationIds, minAccommodations);
 
-        for (String accommodationName: accommodationNames) {
+        for (Long accommodationId: accommodationIds) {
             Optional<AccommodationReview> accommodationReview = accommodationReviewRepository
-                    .findByGuestEmailAndAccommodationName(guestEmail, accommodationName);
+                    .findByGuestEmailAndAccommodationId(guestEmail, accommodationId);
             if (accommodationReview.isPresent()) {
                 accommodationReviews.add(new AccommodationReviewDTO(accommodationReview.get()));
             }
@@ -200,7 +199,7 @@ public class UserService {
 
     public AccommodationReview addAccommodationReview(String guestEmail, AccommodationReviewDTO accommodationReviewDTO) {
         Optional<AccommodationReview> accommodationReview = accommodationReviewRepository
-                .findByGuestEmailAndAccommodationName(guestEmail, accommodationReviewDTO.getAccommodationName());
+                .findByGuestEmailAndAccommodationId(guestEmail, accommodationReviewDTO.getAccommodationId());
         AccommodationReview extractedAccommodationReview;
         if (accommodationReview.isPresent()) {
             extractedAccommodationReview = accommodationReview.get();
@@ -214,9 +213,9 @@ public class UserService {
         return extractedAccommodationReview;
     }
 
-    public AccommodationReview deleteAccommodationReview(String guestEmail, String accommodationName) {
+    public AccommodationReview deleteAccommodationReview(String guestEmail, Long accommodationId) {
         Optional<AccommodationReview> accommodationReview = accommodationReviewRepository
-                .findByGuestEmailAndAccommodationName(guestEmail, accommodationName);
+                .findByGuestEmailAndAccommodationId(guestEmail, accommodationId);
         AccommodationReview extractedAccommodationReview = accommodationReview.get();
         extractedAccommodationReview.setDeleted(true);
         accommodationReviewRepository.persist(extractedAccommodationReview);
