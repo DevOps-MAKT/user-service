@@ -365,7 +365,8 @@ public class UserControllerTests {
                 .when(microserviceCommunicator)
                 .processResponse(config.reservationServiceAPI() + "/reservation/are-reservations-active/gost@gmail.com",
                         "GET",
-                        "Bearer " + jwt);
+                        "Bearer " + jwt,
+                        "");
 
         given()
                 .contentType(ContentType.JSON)
@@ -395,7 +396,8 @@ public class UserControllerTests {
                 .when(microserviceCommunicator)
                 .processResponse(config.reservationServiceAPI() + "/reservation/do-active-reservations-exist/pera@gmail.com",
                         "GET",
-                        "Bearer " + jwt);
+                        "Bearer " + jwt,
+                        "");
 
         given()
                 .contentType(ContentType.JSON)
@@ -427,6 +429,7 @@ public class UserControllerTests {
                 .when(microserviceCommunicator)
                 .processResponse(config.reservationServiceAPI() + "/retrieve-reservation-hosts/gost@gmail.com",
                         "GET",
+                        "",
                         "");
 
         given()
@@ -443,6 +446,21 @@ public class UserControllerTests {
     @Test
     @Order(13)
     public void whenCreateReview_thenReturnCreatedReview() {
+        String notificationBody = """
+                    {
+                        "receiverEmail": "pera@gmail.com",
+                        "notificationType": "HOST_RATED",
+                        "senderEmail": "gost@gmail.com",
+                        "rating": 3
+                    }
+                """;
+        doReturn(new GeneralResponse("", "200"))
+                .when(microserviceCommunicator)
+                .processResponse(config.notificationServiceAPI() + "/notification/create",
+                        "POST",
+                        "",
+                        notificationBody);
+
         Response response = RestAssured.given()
                 .contentType("application/json")
                 .body("{\"username\": \"gost\", \"password\": \"pera123\"}")
@@ -470,7 +488,6 @@ public class UserControllerTests {
         .then()
                 .statusCode(200)
                 .body("data.hostEmail", equalTo("pera@gmail.com"))
-                .body("data.timestamp", equalTo(now))
                 .body("data.rating", equalTo(3))
                 .body("message", equalTo("Successfully added/updated host review"));
     }
@@ -478,6 +495,20 @@ public class UserControllerTests {
     @Test
     @Order(14)
     public void whenUpdateReview_thenReturnUpdatedReview() {
+        String notificationBody = """
+                    {
+                        "receiverEmail": "pera@gmail.com",
+                        "notificationType": "HOST_RATED",
+                        "senderEmail": "gost@gmail.com",
+                        "rating": 5
+                    }
+                """;
+        doReturn(new GeneralResponse("", "200"))
+                .when(microserviceCommunicator)
+                .processResponse(config.notificationServiceAPI() + "/notification/create",
+                        "POST",
+                        "",
+                        notificationBody);
         Response response = RestAssured.given()
                 .contentType("application/json")
                 .body("{\"username\": \"gost\", \"password\": \"pera123\"}")
@@ -582,12 +613,14 @@ public class UserControllerTests {
                 .when(microserviceCommunicator)
                 .processResponse(config.reservationServiceAPI() + "/retrieve-reservation-accommodations/gost@gmail.com",
                         "GET",
+                        "",
                         "");
 
         doReturn(new GeneralResponse(minAccommodationDTOS, "200"))
                 .when(microserviceCommunicator)
                 .processResponse(config.accommodationServiceAPI() + "/retrieve-min-accommodations",
                         "GET",
+                        "",
                         "");
 
         given()
@@ -604,6 +637,21 @@ public class UserControllerTests {
     @Test
     @Order(18)
     public void whenCreateAccommodationReview_thenReturnCreatedReview() {
+        String notificationBody = """
+                    {
+                        "receiverEmail": "pera@gmail.com",
+                        "notificationType": "HOST_RATED",
+                        "senderEmail": "gost@gmail.com",
+                        "rating": 3,
+                        "accommodationId": 1
+                    }
+                """;
+        doReturn(new GeneralResponse("", "200"))
+                .when(microserviceCommunicator)
+                .processResponse(config.notificationServiceAPI() + "/notification/create",
+                        "POST",
+                        "",
+                        notificationBody);
         Response response = RestAssured.given()
                 .contentType("application/json")
                 .body("{\"username\": \"gost\", \"password\": \"pera123\"}")
@@ -631,7 +679,6 @@ public class UserControllerTests {
         .then()
                 .statusCode(200)
                 .body("data.accommodationId", equalTo(1))
-                .body("data.timestamp", equalTo(now))
                 .body("data.rating", equalTo(3))
                 .body("message", equalTo("Successfully added/updated accommodation review"));
     }
@@ -639,6 +686,21 @@ public class UserControllerTests {
     @Test
     @Order(19)
     public void whenUpdateAccommodationReview_thenReturnUpdatedReview() {
+        String notificationBody = """
+                    {
+                        "receiverEmail": "pera@gmail.com",
+                        "notificationType": "HOST_RATED",
+                        "senderEmail": "gost@gmail.com",
+                        "rating": 5,
+                        "accommodationId": 1
+                    }
+                """;
+        doReturn(new GeneralResponse("", "200"))
+                .when(microserviceCommunicator)
+                .processResponse(config.notificationServiceAPI() + "/notification/create",
+                        "POST",
+                        "",
+                        notificationBody);
         Response response = RestAssured.given()
                 .contentType("application/json")
                 .body("{\"username\": \"gost\", \"password\": \"pera123\"}")
@@ -844,7 +906,8 @@ public class UserControllerTests {
                 .when(microserviceCommunicator)
                 .processResponse(config.reservationServiceAPI() + "/reservation/are-reservations-active/gost@gmail.com",
                         "GET",
-                        "Bearer " + jwt);
+                        "Bearer " + jwt,
+                        "");
 
         given()
                 .contentType(ContentType.JSON)
@@ -874,13 +937,15 @@ public class UserControllerTests {
                 .when(microserviceCommunicator)
                 .processResponse(config.reservationServiceAPI() + "/reservation/do-active-reservations-exist/pera@gmail.com",
                         "GET",
-                        "Bearer " + jwt);
+                        "Bearer " + jwt,
+                        "");
 
         doReturn(new GeneralResponse(true, "200"))
                 .when(microserviceCommunicator)
                 .processResponse(config.accommodationServiceAPI() + "/accommodation/deactivate-hosts-accommodations/pera@gmail.com",
                         "DELETE",
-                        "Bearer " + jwt);
+                        "Bearer " + jwt,
+                        "");
 
         given()
                 .contentType(ContentType.JSON)
