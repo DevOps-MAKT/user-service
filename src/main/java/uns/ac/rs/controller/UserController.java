@@ -192,7 +192,8 @@ public class UserController {
         GeneralResponse response = microserviceCommunicator.processResponse(
                 config.reservationServiceAPI() + "/reservation/are-reservations-active/" + email,
                 "GET",
-                authorizationHeader);
+                authorizationHeader,
+                "");
         if ((boolean) response.getData()) {
             logger.info("Reservations are active for user with email " + email);
             return Response
@@ -219,7 +220,8 @@ public class UserController {
         GeneralResponse response = microserviceCommunicator.processResponse(
                 config.reservationServiceAPI() + "/reservation/do-active-reservations-exist/" + email,
                 "GET",
-                authorizationHeader);
+                authorizationHeader,
+                "");
         if ((boolean) response.getData()) {
             logger.info("Active reservations exist for user with email " + email);
             return Response
@@ -235,7 +237,8 @@ public class UserController {
         GeneralResponse successfulAccommodationDeletion = microserviceCommunicator.processResponse(
                 config.accommodationServiceAPI() + "/accommodation/deactivate-hosts-accommodations/" + email,
                 "DELETE",
-                authorizationHeader);
+                authorizationHeader,
+                "");
         if (!(boolean) successfulAccommodationDeletion.getData())  {
             logger.warn("Something went wrong while deactivating accommodations from user with email " + email);
             return Response
@@ -259,6 +262,7 @@ public class UserController {
         GeneralResponse response = microserviceCommunicator.processResponse(
                 config.reservationServiceAPI() + "/retrieve-reservation-hosts/" + email,
                 "GET",
+                "",
                 "");
         logger.info("Successfully retrieved host emails where the user with email " + email + " has had reservations");
         List<String> hostEmails = (List<String>) response.getData();
@@ -280,6 +284,7 @@ public class UserController {
         GeneralResponse response = microserviceCommunicator.processResponse(
                 config.reservationServiceAPI() + "/retrieve-reservation-accommodations/" + email,
                 "GET",
+                "",
                 "");
         List<Long> accommodationIds = (List<Long>) response.getData();
         logger.info("Successfully retrieved accommodations where the user with email " + email + " has had reservations");
@@ -288,6 +293,7 @@ public class UserController {
         GeneralResponse minAccommodations = microserviceCommunicator.processResponse(
                 config.accommodationServiceAPI() + "/retrieve-min-accommodations",
                 "GET",
+                "",
                 "");
         List<MinAccommodationDTO> minAccommodationDTOS = (List<MinAccommodationDTO>) minAccommodations.getData();
         logger.info("Successfully retrieved accommodation info where the user with email " + email + " has had reservations");
@@ -304,28 +310,85 @@ public class UserController {
     @Path("/add-host-review")
     @RolesAllowed("guest")
     public Response addHostReview(@Context SecurityContext ctx, HostReviewDTO hostReviewDTO) {
-        String email = ctx.getUserPrincipal().getName();
-        logger.info("Adding host review where the user with email " + email + " has had reservations");
-        HostReview addedReview = userService.addHostReview(email, hostReviewDTO);
-        logger.info("Successfully added a host review where the user with email " + email + " has had reservations");
-        return Response
-                .ok()
-                .entity(new GeneralResponse<>(new HostReviewDTO(addedReview), "Successfully added/updated host review"))
-                .build();
+        try {
+            String email = ctx.getUserPrincipal().getName();
+            logger.info("Adding host review where the user with email " + email + " has had reservations");
+            HostReview addedReview = userService.addHostReview(email, hostReviewDTO);
+            logger.info("Successfully added a host review where the user with email " + email + " has had reservations");
+
+            String receiverEmail = hostReviewDTO.getHostEmail();
+            String notificationType = "HOST_RATED";
+            String senderEmail = email;
+            int rating = hostReviewDTO.getRating();
+
+            String notificationBody = String.format(
+                    """
+                    {
+                        "receiverEmail": "%s",
+                        "notificationType": "%s",
+                        "senderEmail": "%s",
+                        "rating": %d
+                    }
+                    """, receiverEmail, notificationType, senderEmail, rating);
+
+            GeneralResponse notification = microserviceCommunicator.processResponse(
+                    config.notificationServiceAPI() + "/notification/create",
+                    "POST",
+                    "",
+                    notificationBody);
+
+            return Response
+                    .ok()
+                    .entity(new GeneralResponse<>(new HostReviewDTO(addedReview), "Successfully added/updated host review"))
+                    .build();
+        } catch (Exception e) {
+            logger.error("Something went wrong when rating host: {}", e.getLocalizedMessage());
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error rating host").build();
+        }
     }
 
     @PUT
     @Path("/add-accommodation-review")
     @RolesAllowed("guest")
     public Response addAccommodationReview(@Context SecurityContext ctx, AccommodationReviewDTO accommodationReviewDTO) {
-        String email = ctx.getUserPrincipal().getName();
-        logger.info("Adding accommodation review where the user with email " + email + " has had reservations");
-        AccommodationReview accommodationReview = userService.addAccommodationReview(email, accommodationReviewDTO);
-        logger.info("Successfully added an accommodation review where the user with email " + email + " has had reservations");
-        return Response
-                .ok()
-                .entity(new GeneralResponse<>(new AccommodationReviewDTO(accommodationReview), "Successfully added/updated accommodation review"))
-                .build();
+        try {
+            String email = ctx.getUserPrincipal().getName();
+            logger.info("Adding accommodation review where the user with email " + email + " has had reservations");
+            AccommodationReview accommodationReview = userService.addAccommodationReview(email, accommodationReviewDTO);
+            logger.info("Successfully added an accommodation review where the user with email " + email + " has had reservations");
+
+            String receiverEmail = accommodationReviewDTO.getHostEmail();
+            String notificationType = "ACCOMMODATION_RATED";
+            String senderEmail = email;
+            int rating = accommodationReview.getRating();
+            long accommodationId = accommodationReview.getAccommodationId();
+
+            String notificationBody = String.format(
+                    """
+                    {
+                        "receiverEmail": "%s",
+                        "notificationType": "%s",
+                        "senderEmail": "%s",
+                        "rating": %d,
+                        "accommodationId": %d
+                    }
+                    """, receiverEmail, notificationType, senderEmail, rating, (int)accommodationId);
+
+            GeneralResponse notification = microserviceCommunicator.processResponse(
+                    config.notificationServiceAPI() + "/notification/create",
+                    "POST",
+                    "",
+                    notificationBody);
+
+            return Response
+                    .ok()
+                    .entity(new GeneralResponse<>(new AccommodationReviewDTO(accommodationReview), "Successfully added/updated accommodation review"))
+                    .build();
+        } catch (Exception e) {
+            logger.error("Something went wrong when rating accommodation: {}", e.getLocalizedMessage());
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error rating accommodation").build();
+        }
+
     }
     @DELETE
     @Path("/delete-host-review/{host_email}")

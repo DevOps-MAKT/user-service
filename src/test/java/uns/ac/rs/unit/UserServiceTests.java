@@ -171,7 +171,6 @@ public class UserServiceTests {
         assertNotNull(addedHostReview);
         assertEquals(hostReviewDTO.getHostEmail(), addedHostReview.getHostEmail());
         assertEquals(hostReviewDTO.getRating(), addedHostReview.getRating());
-        assertEquals(hostReviewDTO.getTimestamp(), addedHostReview.getTimestamp());
     }
 
     @Test
@@ -339,9 +338,9 @@ public class UserServiceTests {
 
         // Create test data
         List<AccommodationReview> reviews = new ArrayList<>();
-        reviews.add(new AccommodationReview("email1", 1L, 123456L, 4, false));
-        reviews.add(new AccommodationReview("email2", 1L, 123457L, 5, false));
-        reviews.add(new AccommodationReview("email3", 1L, 123458L, 3, false));
+        reviews.add(new AccommodationReview("email1","hemail1", 1L, 123456L, 4, false));
+        reviews.add(new AccommodationReview("email2", "hemail2", 1L, 123457L, 5, false));
+        reviews.add(new AccommodationReview("email3", "hemail3", 1L, 123458L, 3, false));
 
         when(accommodationReviewRepository.findByAccommodationId(1L))
                 .thenReturn(Optional.of(reviews));

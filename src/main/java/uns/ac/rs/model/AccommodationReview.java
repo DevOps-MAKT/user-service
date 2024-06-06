@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.Data;
 import uns.ac.rs.dto.AccommodationReviewDTO;
 
+import java.time.Instant;
+
 @Entity
 @Table(name = "accommodation_review")
 @Data
@@ -14,6 +16,9 @@ public class AccommodationReview {
 
     @Column(name = "guest_email")
     private String guestEmail;
+
+    @Column(name = "host_email")
+    private String hostEmail;
 
     @Column(name = "accommodation_id")
     private Long accommodationId;
@@ -31,8 +36,9 @@ public class AccommodationReview {
 
     }
 
-    public AccommodationReview(String guestEmail, Long accommodationId, Long timestamp, Integer rating, boolean deleted) {
+    public AccommodationReview(String guestEmail, String hostEmail, Long accommodationId, Long timestamp, Integer rating, boolean deleted) {
         this.guestEmail = guestEmail;
+        this.hostEmail = hostEmail;
         this.accommodationId = accommodationId;
         this.timestamp = timestamp;
         this.rating = rating;
@@ -41,8 +47,9 @@ public class AccommodationReview {
 
     public AccommodationReview(AccommodationReviewDTO accommodationReviewDTO, String guestEmail) {
         this.guestEmail = guestEmail;
+        this.hostEmail = accommodationReviewDTO.getHostEmail();
         this.accommodationId = accommodationReviewDTO.getAccommodationId();
-        this.timestamp = accommodationReviewDTO.getTimestamp();
+        this.timestamp = Instant.now().toEpochMilli();
         this.rating = accommodationReviewDTO.getRating();
         this.deleted = false;
     }

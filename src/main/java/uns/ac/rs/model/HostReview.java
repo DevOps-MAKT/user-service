@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.Data;
 import uns.ac.rs.dto.HostReviewDTO;
 
+import java.time.Instant;
+
 @Entity
 @Table(name = "host_reviews")
 @Data
@@ -34,7 +36,7 @@ public class HostReview {
     public HostReview(HostReviewDTO hostReviewDTO, String guestEmail) {
         this.guestEmail = guestEmail;
         this.hostEmail = hostReviewDTO.getHostEmail();
-        this.timestamp = hostReviewDTO.getTimestamp();
+        this.timestamp = Instant.now().toEpochMilli();
         this.rating = hostReviewDTO.getRating();
         this.deleted = false;
     }
