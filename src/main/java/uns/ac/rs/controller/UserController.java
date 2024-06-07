@@ -143,10 +143,9 @@ public class UserController {
 
 
     @GET
-    @Path("/get-automatic-reservation-acceptance-status")
-    @RolesAllowed("host")
-    public Response getAutomaticReservationAcceptanceStatus(@Context SecurityContext ctx) {
-        String email = ctx.getUserPrincipal().getName();
+    @Path("/{email}/get-automatic-reservation-acceptance-status")
+    @PermitAll
+    public Response getAutomaticReservationAcceptanceStatus(@Context SecurityContext ctx, @PathParam("email") String email) {
         logger.info("Retrieving automatic reservation status for user with email " + email);
         Boolean isAutomaticReservationAcceptanceActive = userService.getAutomaticReservationAcceptanceStatus(email);
         logger.info("Successfully retrieved automatic reservation status for user with email " + email);
