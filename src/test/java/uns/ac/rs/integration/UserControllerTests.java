@@ -61,7 +61,7 @@ public class UserControllerTests {
     URL changeAutomaticReservationAcceptanceStatusEndpoint;
 
     @TestHTTPEndpoint(UserController.class)
-    @TestHTTPResource("get-automatic-reservation-acceptance-status")
+    @TestHTTPResource("pera@gmail.com/get-automatic-reservation-acceptance-status")
     URL getAutomaticReservationAcceptanceStatusEndpoint;
 
     @TestHTTPEndpoint(UserController.class)
@@ -280,16 +280,6 @@ public class UserControllerTests {
     @Test
     @Order(7)
     public void whenGetAutomaticReservationAcceptanceStatus_thenReturnBooleanValue() {
-        Response response = RestAssured.given()
-                .contentType("application/json")
-                .body("{\"username\": \"pera\", \"password\": \"pera123\"}")
-                .when().post(loginEndpoint)
-                .then().extract().response();
-
-        GeneralResponse generalResponse = response.as(GeneralResponse.class);
-        LinkedHashMap data = (LinkedHashMap) generalResponse.getData();
-        jwt = (String) data.get("jwt");
-
         given()
                 .contentType(ContentType.JSON)
                 .header("Authorization", "Bearer " + jwt)
