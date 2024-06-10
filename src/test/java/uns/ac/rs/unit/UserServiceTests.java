@@ -72,7 +72,7 @@ public class UserServiceTests {
     public void testChangeAutomaticReservationAcceptanceStatus() {
         User mockUser = new User("some.email@gmail.com", "other-username", "other-pw", "host", "other-name", "other-last-name", "Subotica", "Serbia");
         when(userRepository.findByEmail("some.email@gmail.com")).thenReturn(mockUser);
-        User user = userService.changeAutomaticReservationAcceptanceStatus("some.email@gmail.com");
+        User user = userService.changeAutomaticReservationAcceptanceStatus("some.email@gmail.com", true);
 
         verify(userRepository).persist(user);
 

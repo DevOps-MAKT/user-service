@@ -128,12 +128,12 @@ public class UserController {
     }
 
     @PATCH
-    @Path("/change-automatic-reservation-acceptance-status")
+    @Path("/change-automatic-reservation-acceptance-status/{value}")
     @RolesAllowed("host")
-    public Response changeAutomaticReservationAcceptance(@Context SecurityContext ctx) {
+    public Response changeAutomaticReservationAcceptance(@Context SecurityContext ctx, boolean value) {
         String email = ctx.getUserPrincipal().getName();
         logger.info("Changing automatic reservation status for user with email " + email);
-        User user = userService.changeAutomaticReservationAcceptanceStatus(email);
+        User user = userService.changeAutomaticReservationAcceptanceStatus(email, value);
         logger.info("Successfully changed automatic reservation status for user with email " + email);
         return Response
                 .ok()
@@ -511,6 +511,19 @@ public class UserController {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                     .entity("Error updating active notification statuses").build();
         }
+    }
+
+    @GET
+    @Path("/reviews-by-user/{guestEmail}")
+    @PermitAll
+    public Response getUserReviews(@PathParam("guestEmail") String guestEmail) {
+        logger.info("Retrieving reviews by user " + guestEmail);
+        GuestReviewsInfoDTO userReviews = userService.getUserReviews(guestEmail);
+        logger.info("Successsfully retrieved reviews by user " + guestEmail);
+        return Response
+                .ok()
+                .entity(new GeneralResponse<>(userReviews, "Successfully retrieved accommodation reviews info"))
+                .build();
     }
 
 }
