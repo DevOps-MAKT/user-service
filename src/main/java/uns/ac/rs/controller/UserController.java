@@ -418,10 +418,9 @@ public class UserController {
     }
 
     @GET
-    @Path("/host-reviews-info")
-    @RolesAllowed("host")
-    public Response getHostReviewsInfo(@Context SecurityContext ctx) {
-        String email = ctx.getUserPrincipal().getName();
+    @Path("/host-reviews-info/{hostEmail}")
+    @PermitAll
+    public Response getHostReviewsInfo(@Context SecurityContext ctx, @PathParam("hostEmail") String email) {
         logger.info("Retrieving reviews and average rating of a host with email " + email);
         HostReviewInfoDTO hostReviewInfoDTO = userService.getHostReviewsInfo(email);
         logger.info("Successfully retrieved reviews and average rating of a host with email " + email);
@@ -485,6 +484,24 @@ public class UserController {
             String email = ctx.getUserPrincipal().getName();
             logger.info("Updating active notification statuses for user with email " + email);
             User user = userService.updateActiveNotificationStatuses(email, notificationStatusesDTO);
+            return Response
+                    .ok()
+                    .entity(new GeneralResponse<>(new UserResponseDTO(user), "Successfully updated active notification statuses"))
+                    .build();
+        } catch (Exception e) {
+            logger.error("Error updating active notification statuses: {}", e.getLocalizedMessage());
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("Error updating active notification statuses").build();
+        }
+    }
+
+    @GET
+    @Path("/{email}")
+    @PermitAll
+    public Response getUserByEmail(@PathParam("email") String email) {
+        try {
+            logger.info("Retrieving user with email " + email);
+            User user = userService.getUserByEmail(email);
             return Response
                     .ok()
                     .entity(new GeneralResponse<>(new UserResponseDTO(user), "Successfully updated active notification statuses"))

@@ -9,11 +9,13 @@ import uns.ac.rs.model.HostReview;
 public class HostReviewDTO {
 
     private String hostEmail;
+    private String guestEmail;
     private Long timestamp;
     private Integer rating;
     private boolean deleted;
 
     public HostReviewDTO() {
+        this.guestEmail = null;
         this.hostEmail = null;
         this.timestamp = null;
         this.rating = null;
@@ -21,6 +23,7 @@ public class HostReviewDTO {
     }
 
     public HostReviewDTO(HostReview hostReview) {
+        this.guestEmail = hostReview.getGuestEmail();
         this.hostEmail = hostReview.getHostEmail();
         this.timestamp = hostReview.getTimestamp();
         this.rating = hostReview.getRating();

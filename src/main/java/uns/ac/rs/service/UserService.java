@@ -263,4 +263,8 @@ public class UserService {
 
         return names;
     }
+
+    public User getUserByEmail(String email) {
+        return userRepository.findByEmail(email);
+    }
 }

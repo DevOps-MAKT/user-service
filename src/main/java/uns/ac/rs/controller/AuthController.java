@@ -49,7 +49,7 @@ public class AuthController {
         else {
             String jwt = authService.generateJwt(user.get());
             logger.info("Login successful for {}", loginDTO.getUsername());
-            return Response.ok(new GeneralResponse<>(new JWTResponse(jwt, user.get().getRole()), "Successfully logged in"))
+            return Response.ok(new GeneralResponse<>(new JWTResponse(jwt, user.get().getRole(), user.get().getEmail()), "Successfully logged in"))
                     .build();
         }
     }
