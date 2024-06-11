@@ -18,4 +18,8 @@ public class HostReviewRepository implements PanacheRepository<HostReview> {
     public Optional<List<HostReview>> findByHostEmail(String hostEmail) {
         return Optional.ofNullable(list("hostEmail = ?1 and deleted = ?2", hostEmail, false));
     }
+
+    public Optional<List<HostReview>> findByGuestEmail(String guestEmail) {
+        return Optional.ofNullable(list("guestEmail = ?1 and deleted = ?2", guestEmail, false));
+    }
 }

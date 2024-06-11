@@ -57,7 +57,7 @@ public class UserControllerTests {
     URL retrieveCurrentUserInfoEndpoint;
 
     @TestHTTPEndpoint(UserController.class)
-    @TestHTTPResource("change-automatic-reservation-acceptance-status")
+    @TestHTTPResource("change-automatic-reservation-acceptance-status/true")
     URL changeAutomaticReservationAcceptanceStatusEndpoint;
 
     @TestHTTPEndpoint(UserController.class)
@@ -93,7 +93,7 @@ public class UserControllerTests {
     URL deleteHostReviewEndpoint;
 
     @TestHTTPEndpoint(UserController.class)
-    @TestHTTPResource("host-reviews-info")
+    @TestHTTPResource("host-reviews-info/pera@gmail.com")
     URL hostReviewsInfoEndpoint;
 
     @TestHTTPEndpoint(UserController.class)

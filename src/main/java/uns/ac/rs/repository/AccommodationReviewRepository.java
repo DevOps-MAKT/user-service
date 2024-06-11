@@ -18,4 +18,8 @@ public class AccommodationReviewRepository implements PanacheRepository<Accommod
     public Optional<List<AccommodationReview>> findByAccommodationId(Long accommodationId) {
         return Optional.ofNullable(list("accommodationId = ?1 and deleted = ?2", accommodationId, false));
     }
+
+    public Optional<List<AccommodationReview>> findByGuestEmailId(String guestEmail) {
+        return Optional.ofNullable(list("guestEmail = ?1 and deleted = ?2", guestEmail, false));
+    }
 }

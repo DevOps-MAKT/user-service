@@ -62,9 +62,9 @@ public class UserService {
         return userRepository.findByEmail(email);
     }
 
-    public User changeAutomaticReservationAcceptanceStatus(String email) {
+    public User changeAutomaticReservationAcceptanceStatus(String email, boolean value) {
         User user = userRepository.findByEmail(email);
-        user.setAutomaticReservationAcceptance(!user.isAutomaticReservationAcceptance());
+        user.setAutomaticReservationAcceptance(value);
         userRepository.persist(user);
         return user;
     }
@@ -262,5 +262,37 @@ public class UserService {
         }
 
         return names;
+    }
+
+    public User getUserByEmail(String email) {
+        return userRepository.findByEmail(email);
+    }
+
+    public GuestReviewsInfoDTO getUserReviews(String guestEmail) {
+        GuestReviewsInfoDTO guestReviews = new GuestReviewsInfoDTO();
+
+        Optional<List<HostReview>> hostReviews = hostReviewRepository.findByGuestEmail(guestEmail);
+        Optional<List<AccommodationReview>> accommodationReviews = accommodationReviewRepository
+                .findByGuestEmailId(guestEmail);
+
+        List<HostReviewDTO> hostReviewDTOS = new ArrayList<>();
+        if (hostReviews.isPresent() && !hostReviews.get().isEmpty()) {
+            for (HostReview hostReview: hostReviews.get()) {
+                HostReviewDTO hostReviewDTO = new HostReviewDTO(hostReview);
+                hostReviewDTOS.add(hostReviewDTO);
+            }
+        }
+        guestReviews.setHostReviews(hostReviewDTOS);
+
+        List<AccommodationReviewDTO> accommodationReviewDTOS = new ArrayList<>();
+        if (accommodationReviews.isPresent() && !accommodationReviews.get().isEmpty()) {
+            for (AccommodationReview accommodationReview: accommodationReviews.get()) {
+                AccommodationReviewDTO accommodationReviewDTO = new AccommodationReviewDTO(accommodationReview);
+                accommodationReviewDTOS.add(accommodationReviewDTO);
+            }
+        }
+        guestReviews.setAccommodationReviews(accommodationReviewDTOS);
+
+        return guestReviews;
     }
 }
