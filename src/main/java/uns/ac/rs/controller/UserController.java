@@ -31,6 +31,7 @@ import java.util.List;
 @Consumes(MediaType.APPLICATION_JSON)
 public class UserController {
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
+    public static final String HAS_HAD_RESERVATIONS = " has had reservations";
 
     @Autowired
     private UserService userService;
@@ -257,13 +258,13 @@ public class UserController {
     @RolesAllowed("guest")
     public Response getHostReviews(@Context SecurityContext ctx) {
         String email = ctx.getUserPrincipal().getName();
-        logger.info("Retrieving host emails where the user with email " + email + " has had reservations");
+        logger.info("Retrieving host emails where the user with email " + email + HAS_HAD_RESERVATIONS);
         GeneralResponse response = microserviceCommunicator.processResponse(
                 config.reservationServiceAPI() + "/retrieve-reservation-hosts/" + email,
                 "GET",
                 "",
                 "");
-        logger.info("Successfully retrieved host emails where the user with email " + email + " has had reservations");
+        logger.info("Successfully retrieved host emails where the user with email " + email + HAS_HAD_RESERVATIONS);
         List<String> hostEmails = (List<String>) response.getData();
         logger.info("Retrieving reviews for the hosts from the user with email " + email);
         List<HostReviewDTO> reviewDTOS = userService.retrieveHostReviews(hostEmails, email);
@@ -279,26 +280,26 @@ public class UserController {
     @RolesAllowed("guest")
     public Response getAccommodationReviews(@Context SecurityContext ctx) {
         String email = ctx.getUserPrincipal().getName();
-        logger.info("Retrieving accommodations where the user with email " + email + " has had reservations");
+        logger.info("Retrieving accommodations where the user with email " + email + HAS_HAD_RESERVATIONS);
         GeneralResponse response = microserviceCommunicator.processResponse(
                 config.reservationServiceAPI() + "/retrieve-reservation-accommodations/" + email,
                 "GET",
                 "",
                 "");
         List<Long> accommodationIds = (List<Long>) response.getData();
-        logger.info("Successfully retrieved accommodations where the user with email " + email + " has had reservations");
+        logger.info("Successfully retrieved accommodations where the user with email " + email + HAS_HAD_RESERVATIONS);
 
-        logger.info("Retrieving info about accommodations where the user with email " + email + " has had reservations");
+        logger.info("Retrieving info about accommodations where the user with email " + email + HAS_HAD_RESERVATIONS);
         GeneralResponse minAccommodations = microserviceCommunicator.processResponse(
                 config.accommodationServiceAPI() + "/retrieve-min-accommodations",
                 "GET",
                 "",
                 "");
         List<MinAccommodationDTO> minAccommodationDTOS = (List<MinAccommodationDTO>) minAccommodations.getData();
-        logger.info("Successfully retrieved accommodation info where the user with email " + email + " has had reservations");
-        logger.info("Retrieving accommodation reviews where the user with email " + email + " has had reservations");
+        logger.info("Successfully retrieved accommodation info where the user with email " + email + HAS_HAD_RESERVATIONS);
+        logger.info("Retrieving accommodation reviews where the user with email " + email + HAS_HAD_RESERVATIONS);
         List<AccommodationReviewDTO> accommodationReviews = userService.retrieveAccommodationReviews(email, accommodationIds, minAccommodationDTOS);
-        logger.info("Successfully retrieved accommodation reviews where the user with email " + email + " has had reservations");
+        logger.info("Successfully retrieved accommodation reviews where the user with email " + email + HAS_HAD_RESERVATIONS);
         return Response
                 .ok()
                 .entity(new GeneralResponse<>(accommodationReviews, "Successfully retrieved reviews"))
@@ -311,9 +312,9 @@ public class UserController {
     public Response addHostReview(@Context SecurityContext ctx, HostReviewDTO hostReviewDTO) {
         try {
             String email = ctx.getUserPrincipal().getName();
-            logger.info("Adding host review where the user with email " + email + " has had reservations");
+            logger.info("Adding host review where the user with email " + email + HAS_HAD_RESERVATIONS);
             HostReview addedReview = userService.addHostReview(email, hostReviewDTO);
-            logger.info("Successfully added a host review where the user with email " + email + " has had reservations");
+            logger.info("Successfully added a host review where the user with email " + email + HAS_HAD_RESERVATIONS);
 
             String receiverEmail = hostReviewDTO.getHostEmail();
             String notificationType = "HOST_RATED";
@@ -352,9 +353,9 @@ public class UserController {
     public Response addAccommodationReview(@Context SecurityContext ctx, AccommodationReviewDTO accommodationReviewDTO) {
         try {
             String email = ctx.getUserPrincipal().getName();
-            logger.info("Adding accommodation review where the user with email " + email + " has had reservations");
+            logger.info("Adding accommodation review where the user with email " + email + HAS_HAD_RESERVATIONS);
             AccommodationReview accommodationReview = userService.addAccommodationReview(email, accommodationReviewDTO);
-            logger.info("Successfully added an accommodation review where the user with email " + email + " has had reservations");
+            logger.info("Successfully added an accommodation review where the user with email " + email + HAS_HAD_RESERVATIONS);
 
             String receiverEmail = accommodationReviewDTO.getHostEmail();
             String notificationType = "ACCOMMODATION_RATED";
@@ -394,9 +395,9 @@ public class UserController {
     @RolesAllowed("guest")
     public Response deleteHostReview(@Context SecurityContext ctx, @PathParam("host_email") String hostEmail) {
         String email = ctx.getUserPrincipal().getName();
-        logger.info("Deleting a host review where the user with email " + email + " has had reservations");
+        logger.info("Deleting a host review where the user with email " + email + HAS_HAD_RESERVATIONS);
         HostReview deletedReview = userService.deleteHostReview(email, hostEmail);
-        logger.info("Successfully deleted the host review where the user with email " + email + " has had reservations");
+        logger.info("Successfully deleted the host review where the user with email " + email + HAS_HAD_RESERVATIONS);
         return Response
                 .ok()
                 .entity(new GeneralResponse<>(new HostReviewDTO(deletedReview), "Successfully deleted host review"))
@@ -408,9 +409,9 @@ public class UserController {
     @RolesAllowed("guest")
     public Response deleteAccommodationReview(@Context SecurityContext ctx, @PathParam("accommodation_id") Long accommodationId) {
         String email = ctx.getUserPrincipal().getName();
-        logger.info("Deleting an accommodation review where the user with email " + email + " has had reservations");
+        logger.info("Deleting an accommodation review where the user with email " + email + HAS_HAD_RESERVATIONS);
         AccommodationReview deletedReview = userService.deleteAccommodationReview(email, accommodationId);
-        logger.info("Successfully deleted the accommodation review where the user with email " + email + " has had reservations");
+        logger.info("Successfully deleted the accommodation review where the user with email " + email + HAS_HAD_RESERVATIONS);
         return Response
                 .ok()
                 .entity(new GeneralResponse<>(new AccommodationReviewDTO(deletedReview), "Successfully deleted accommodation review"))

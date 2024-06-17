@@ -10,8 +10,4 @@ import java.util.List;
 public class GuestReviewsInfoDTO {
     private List<AccommodationReviewDTO> accommodationReviews;
     private List<HostReviewDTO> hostReviews;
-
-    public GuestReviewsInfoDTO() {
-
-    }
 }
