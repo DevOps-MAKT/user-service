@@ -121,7 +121,7 @@ public class UserControllerTests {
     URL updatePasswordEndpoint;
 
     @TestHTTPEndpoint(UserController.class)
-    @TestHTTPResource("retrieve-active-notification-types")
+    @TestHTTPResource("retrieve-active-notification-types/gost@gmail.com")
     URL retrieveActiveNotificationTypesEndpoint;
 
     @TestHTTPEndpoint(UserController.class)
