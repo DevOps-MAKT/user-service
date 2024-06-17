@@ -8,8 +8,4 @@ import lombok.Data;
 public class PasswordDTO {
     private String password;
     private String confirmationPassword;
-
-    public PasswordDTO() {
-
-    }
 }

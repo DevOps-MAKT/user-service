@@ -9,7 +9,6 @@ import io.restassured.response.Response;
 import org.junit.jupiter.api.*;
 import uns.ac.rs.GeneralResponse;
 import uns.ac.rs.controller.AuthController;
-import uns.ac.rs.dto.response.JWTResponse;
 
 import static org.hamcrest.Matchers.*;
 

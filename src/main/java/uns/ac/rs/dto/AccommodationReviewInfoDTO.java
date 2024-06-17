@@ -10,8 +10,4 @@ import java.util.List;
 public class AccommodationReviewInfoDTO {
     private List<AccommodationReviewDTO> reviews;
     private float avgRating;
-
-    public AccommodationReviewInfoDTO() {
-
-    }
 }
