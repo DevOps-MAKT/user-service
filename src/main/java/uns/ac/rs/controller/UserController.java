@@ -457,11 +457,10 @@ public class UserController {
     }
 
     @GET
-    @Path("/retrieve-active-notification-types")
+    @Path("/retrieve-active-notification-types/{email}")
     @PermitAll
-    public Response retrieveActiveNotifications(@Context SecurityContext ctx) {
+    public Response retrieveActiveNotifications(@PathParam("email") String email) {
         try {
-            String email = ctx.getUserPrincipal().getName();
             logger.info("Retrieving notification statuses for user with email " + email);
             NotificationStatusesDTO notificationStatusesDTO = userService.retrieveNotificationStatuses(email);
             logger.info("Successfully retrieved notification statuses for user with email " + email);
